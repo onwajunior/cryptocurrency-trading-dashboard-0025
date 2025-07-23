@@ -3,10 +3,10 @@ import { Upload, FileText, History } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 
 const Dashboard = () => {
+  const [activeTab, setActiveTab] = useState("assessment");
   const [companies, setCompanies] = useState("");
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
 
@@ -54,119 +54,131 @@ const Dashboard = () => {
         <div className="w-64 bg-card border-r border-border min-h-screen">
           <div className="p-6">
             <h2 className="text-xl font-semibold gradient-text mb-6">Risk Buddy</h2>
-            <Tabs defaultValue="assessment" orientation="vertical" className="w-full">
-              <TabsList className="grid w-full grid-rows-2 h-auto">
-                <TabsTrigger value="assessment" className="justify-start">
-                  <FileText className="h-4 w-4 mr-2" />
-                  Assessment
-                </TabsTrigger>
-                <TabsTrigger value="library" className="justify-start">
-                  <History className="h-4 w-4 mr-2" />
-                  Library
-                </TabsTrigger>
-              </TabsList>
-              
-              {/* Main Content */}
-              <div className="flex-1 p-6">
-                <TabsContent value="assessment" className="mt-0">
-                  <Card className="glass-card">
-                    <CardHeader>
-                      <CardTitle className="gradient-text">New Risk Assessment</CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-6">
-                      {/* Upload Section */}
-                      <div className="space-y-4">
-                        <h3 className="text-lg font-medium">Upload Company List</h3>
-                        <div className="border-2 border-dashed border-border rounded-lg p-6 text-center hover:border-primary/50 transition-colors">
-                          <Upload className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-                          <Input
-                            type="file"
-                            accept=".csv,.xlsx,.txt"
-                            onChange={handleFileUpload}
-                            className="hidden"
-                            id="file-upload"
-                          />
-                          <label htmlFor="file-upload" className="cursor-pointer">
-                            <Button variant="outline" className="mb-2">
-                              Choose File
-                            </Button>
-                            <p className="text-sm text-muted-foreground">
-                              Upload CSV, Excel, or text file with company names
-                            </p>
-                          </label>
-                          {uploadedFile && (
-                            <p className="mt-2 text-sm text-primary">
-                              Uploaded: {uploadedFile.name}
-                            </p>
-                          )}
-                        </div>
-                      </div>
-
-                      {/* Manual Entry Section */}
-                      <div className="space-y-4">
-                        <h3 className="text-lg font-medium">Or Enter Manually</h3>
-                        <Textarea
-                          placeholder="Enter company names (one per line)&#10;Example:&#10;Apple Inc.&#10;Microsoft Corporation&#10;Google LLC"
-                          value={companies}
-                          onChange={(e) => setCompanies(e.target.value)}
-                          className="min-h-[200px]"
-                        />
-                      </div>
-
-                      <Button 
-                        onClick={handleAnalyze} 
-                        className="w-full bg-gradient-primary"
-                        disabled={!companies.trim() && !uploadedFile}
-                      >
-                        Start Risk Analysis
-                      </Button>
-                    </CardContent>
-                  </Card>
-                </TabsContent>
-
-                <TabsContent value="library" className="mt-0">
-                  <Card className="glass-card">
-                    <CardHeader>
-                      <CardTitle className="gradient-text">Assessment Library</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="space-y-4">
-                        {mockAssessments.map((assessment) => (
-                          <Card key={assessment.id} className="card-hover">
-                            <CardContent className="p-4">
-                              <div className="flex justify-between items-start">
-                                <div className="flex-1">
-                                  <h4 className="font-medium mb-1">{assessment.name}</h4>
-                                  <p className="text-sm text-muted-foreground mb-2">
-                                    {assessment.date}
-                                  </p>
-                                  <p className="text-xs text-muted-foreground">
-                                    Companies: {assessment.companies.join(", ")}
-                                  </p>
-                                </div>
-                                <div className="flex flex-col items-end gap-2">
-                                  <span className={`text-xs px-2 py-1 rounded-full ${
-                                    assessment.status === "Completed" 
-                                      ? "bg-green-500/20 text-green-400" 
-                                      : "bg-yellow-500/20 text-yellow-400"
-                                  }`}>
-                                    {assessment.status}
-                                  </span>
-                                  <Button variant="outline" size="sm">
-                                    View Report
-                                  </Button>
-                                </div>
-                              </div>
-                            </CardContent>
-                          </Card>
-                        ))}
-                      </div>
-                    </CardContent>
-                  </Card>
-                </TabsContent>
-              </div>
-            </Tabs>
+            <nav className="space-y-2">
+              <button
+                onClick={() => setActiveTab("assessment")}
+                className={`w-full flex items-center px-4 py-3 rounded-lg text-left transition-colors ${
+                  activeTab === "assessment"
+                    ? "bg-primary text-primary-foreground"
+                    : "hover:bg-muted"
+                }`}
+              >
+                <FileText className="h-4 w-4 mr-3" />
+                Assessment
+              </button>
+              <button
+                onClick={() => setActiveTab("library")}
+                className={`w-full flex items-center px-4 py-3 rounded-lg text-left transition-colors ${
+                  activeTab === "library"
+                    ? "bg-primary text-primary-foreground"
+                    : "hover:bg-muted"
+                }`}
+              >
+                <History className="h-4 w-4 mr-3" />
+                Library
+              </button>
+            </nav>
           </div>
+        </div>
+
+        {/* Main Content Area */}
+        <div className="flex-1 p-6">
+          {activeTab === "assessment" && (
+            <Card className="glass-card">
+              <CardHeader>
+                <CardTitle className="gradient-text">New Risk Assessment</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                {/* Upload Section */}
+                <div className="space-y-4">
+                  <h3 className="text-lg font-medium">Upload Company List</h3>
+                  <div className="border-2 border-dashed border-border rounded-lg p-6 text-center hover:border-primary/50 transition-colors">
+                    <Upload className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
+                    <Input
+                      type="file"
+                      accept=".csv,.xlsx,.txt"
+                      onChange={handleFileUpload}
+                      className="hidden"
+                      id="file-upload"
+                    />
+                    <label htmlFor="file-upload" className="cursor-pointer">
+                      <Button variant="outline" className="mb-2">
+                        Choose File
+                      </Button>
+                      <p className="text-sm text-muted-foreground">
+                        Upload CSV, Excel, or text file with company names
+                      </p>
+                    </label>
+                    {uploadedFile && (
+                      <p className="mt-2 text-sm text-primary">
+                        Uploaded: {uploadedFile.name}
+                      </p>
+                    )}
+                  </div>
+                </div>
+
+                {/* Manual Entry Section */}
+                <div className="space-y-4">
+                  <h3 className="text-lg font-medium">Or Enter Manually</h3>
+                  <Textarea
+                    placeholder="Enter company names (one per line)&#10;Example:&#10;Apple Inc.&#10;Microsoft Corporation&#10;Google LLC"
+                    value={companies}
+                    onChange={(e) => setCompanies(e.target.value)}
+                    className="min-h-[200px]"
+                  />
+                </div>
+
+                <Button 
+                  onClick={handleAnalyze} 
+                  className="w-full bg-gradient-primary"
+                  disabled={!companies.trim() && !uploadedFile}
+                >
+                  Start Risk Analysis
+                </Button>
+              </CardContent>
+            </Card>
+          )}
+
+          {activeTab === "library" && (
+            <Card className="glass-card">
+              <CardHeader>
+                <CardTitle className="gradient-text">Assessment Library</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {mockAssessments.map((assessment) => (
+                    <Card key={assessment.id} className="card-hover">
+                      <CardContent className="p-4">
+                        <div className="flex justify-between items-start">
+                          <div className="flex-1">
+                            <h4 className="font-medium mb-1">{assessment.name}</h4>
+                            <p className="text-sm text-muted-foreground mb-2">
+                              {assessment.date}
+                            </p>
+                            <p className="text-xs text-muted-foreground">
+                              Companies: {assessment.companies.join(", ")}
+                            </p>
+                          </div>
+                          <div className="flex flex-col items-end gap-2">
+                            <span className={`text-xs px-2 py-1 rounded-full ${
+                              assessment.status === "Completed" 
+                                ? "bg-green-500/20 text-green-400" 
+                                : "bg-yellow-500/20 text-yellow-400"
+                            }`}>
+                              {assessment.status}
+                            </span>
+                            <Button variant="outline" size="sm">
+                              View Report
+                            </Button>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          )}
         </div>
       </div>
     </div>

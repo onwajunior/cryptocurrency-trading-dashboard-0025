@@ -34,8 +34,8 @@ const Index = () => {
           </h1>
           <p className="text-xl text-muted-foreground mb-8 max-w-3xl mx-auto">Get detailed financial risk profiles with AI-powered analysis, interactive charts and expert recommendations.</p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button size="lg" className="text-lg px-8">
-              Start Free Analysis <ArrowRight className="ml-2 h-5 w-5" />
+            <Button size="lg" className="text-lg px-8" asChild>
+              <a href="/dashboard">Start Free Analysis <ArrowRight className="ml-2 h-5 w-5" /></a>
             </Button>
             <Button size="lg" variant="outline" className="text-lg px-8">
               View Demo
@@ -175,8 +175,8 @@ const Index = () => {
           <p className="text-xl text-muted-foreground mb-8">
             Start your comprehensive financial analysis today with AI-powered insights
           </p>
-          <Button size="lg" className="text-lg px-8">
-            Get Started Now <ArrowRight className="ml-2 h-5 w-5" />
+          <Button size="lg" className="text-lg px-8" asChild>
+            <a href="/dashboard">Get Started Now <ArrowRight className="ml-2 h-5 w-5" /></a>
           </Button>
         </div>
       </section>

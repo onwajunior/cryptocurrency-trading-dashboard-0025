@@ -101,14 +101,14 @@ const Dashboard = () => {
                       className="hidden"
                       id="file-upload"
                     />
-                    <label htmlFor="file-upload" className="cursor-pointer">
-                      <Button variant="outline" className="mb-2">
+                    <div className="cursor-pointer" onClick={() => document.getElementById('file-upload')?.click()}>
+                      <Button variant="outline" className="mb-2" type="button">
                         Choose File
                       </Button>
                       <p className="text-sm text-muted-foreground">
                         Upload CSV, Excel, or text file with company names
                       </p>
-                    </label>
+                    </div>
                     {uploadedFile && (
                       <p className="mt-2 text-sm text-primary">
                         Uploaded: {uploadedFile.name}

@@ -82,7 +82,7 @@ const Index = () => {
                 <Shield className="h-12 w-12 text-warning mb-4" />
                 <CardTitle>Risk Metrics</CardTitle>
                 <CardDescription>
-                  Calculate Altman Z-scores, solvency, profitability, and liquidity ratios
+                  Calculate critical financial ratios and benchmark against best-practice
                 </CardDescription>
               </CardHeader>
             </Card>

@@ -6,18 +6,18 @@ import riskBuddyLogo from "@/assets/risk-buddy-logo.png";
 const Index = () => {
   return <div className="min-h-screen bg-background">
       {/* Navigation */}
-      <nav className="glass-card border-b-0">
+      <nav className="border-b border-border">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16 items-center">
             <div className="flex items-center">
-              <Shield className="h-8 w-8 mr-2 text-primary animate-float" />
-              <span className="text-xl font-bold gradient-text">Risk Buddy</span>
+              <Shield className="h-8 w-8 mr-2 text-primary" />
+              <span className="text-xl font-bold">Risk Buddy</span>
             </div>
             <div className="flex items-center space-x-4">
-              <Button variant="ghost" className="hover:bg-primary/10">Features</Button>
-              <Button variant="ghost" className="hover:bg-primary/10">Pricing</Button>
-              <Button variant="outline" className="border-primary/30 hover:bg-primary/10">Sign In</Button>
-              <Button className="bg-primary hover:bg-primary/90 shadow-lg">Get Started</Button>
+              <Button variant="ghost">Features</Button>
+              <Button variant="ghost">Pricing</Button>
+              <Button variant="outline">Sign In</Button>
+              <Button>Get Started</Button>
             </div>
           </div>
         </div>
@@ -29,13 +29,10 @@ const Index = () => {
           <Badge className="mb-4" variant="secondary">
             AI-Powered Financial Analysis
           </Badge>
-          <h1 className="text-4xl md:text-6xl font-bold mb-6 gradient-text">
+          <h1 className="text-4xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-foreground to-muted-foreground bg-clip-text text-transparent">
             Comprehensive Financial Risk Assessment for Any Company
           </h1>
-          <p className="text-xl text-muted-foreground mb-8 max-w-3xl mx-auto">
-            Get detailed financial risk profiles with AI-powered analysis. Calculate Altman Z-scores, 
-            solvency ratios, profitability metrics, and liquidity ratios with interactive charts and expert recommendations.
-          </p>
+          <p className="text-xl text-muted-foreground mb-8 max-w-3xl mx-auto">Get detailed financial risk profiles with AI-powered analysis, interactive charts and expert recommendations.</p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button size="lg" className="text-lg px-8">
               Start Free Analysis <ArrowRight className="ml-2 h-5 w-5" />
@@ -60,7 +57,7 @@ const Index = () => {
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            <Card className="glass-card card-hover">
+            <Card className="border-border">
               <CardHeader>
                 <TrendingUp className="h-12 w-12 text-primary mb-4" />
                 <CardTitle>AI-Powered Analysis</CardTitle>
@@ -70,7 +67,7 @@ const Index = () => {
               </CardHeader>
             </Card>
 
-            <Card className="glass-card card-hover">
+            <Card className="border-border">
               <CardHeader>
                 <BarChart3 className="h-12 w-12 text-success mb-4" />
                 <CardTitle>Interactive Charts</CardTitle>
@@ -80,7 +77,7 @@ const Index = () => {
               </CardHeader>
             </Card>
 
-            <Card className="glass-card card-hover">
+            <Card className="border-border">
               <CardHeader>
                 <Shield className="h-12 w-12 text-warning mb-4" />
                 <CardTitle>Risk Metrics</CardTitle>
@@ -90,7 +87,7 @@ const Index = () => {
               </CardHeader>
             </Card>
 
-            <Card className="glass-card card-hover">
+            <Card className="border-border">
               <CardHeader>
                 <FileText className="h-12 w-12 text-primary mb-4" />
                 <CardTitle>Batch Analysis</CardTitle>
@@ -100,7 +97,7 @@ const Index = () => {
               </CardHeader>
             </Card>
 
-            <Card className="glass-card card-hover">
+            <Card className="border-border">
               <CardHeader>
                 <Users className="h-12 w-12 text-success mb-4" />
                 <CardTitle>Analysis Library</CardTitle>
@@ -110,7 +107,7 @@ const Index = () => {
               </CardHeader>
             </Card>
 
-            <Card className="glass-card card-hover">
+            <Card className="border-border">
               <CardHeader>
                 <Zap className="h-12 w-12 text-warning mb-4" />
                 <CardTitle>Export & Share</CardTitle>

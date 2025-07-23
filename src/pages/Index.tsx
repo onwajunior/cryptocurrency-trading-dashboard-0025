@@ -10,7 +10,7 @@ const Index = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16 items-center">
             <div className="flex items-center">
-              <img src={riskBuddyLogo} alt="Risk buddy" className="h-8 w-8 mr-2" />
+              <Shield className="h-8 w-8 mr-2 text-primary" />
               <span className="text-xl font-bold">Risk Buddy</span>
             </div>
             <div className="flex items-center space-x-4">
@@ -189,7 +189,7 @@ const Index = () => {
         <div className="max-w-7xl mx-auto">
           <div className="flex flex-col md:flex-row justify-between items-center">
             <div className="flex items-center mb-4 md:mb-0">
-              <img src={riskBuddyLogo} alt="Risk buddy" className="h-6 w-6 mr-2" />
+              <Shield className="h-6 w-6 mr-2 text-primary" />
               <span className="font-semibold">Risk buddy</span>
             </div>
             <div className="flex space-x-6">

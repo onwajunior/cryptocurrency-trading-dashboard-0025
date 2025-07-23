@@ -121,7 +121,7 @@ const Dashboard = () => {
                 <div className="space-y-4">
                   <h3 className="text-lg font-medium">Or Enter Manually</h3>
                   <Textarea
-                    placeholder="Enter company names (one per line)&#10;Example:&#10;Apple Inc.&#10;Microsoft Corporation&#10;Google LLC"
+                    placeholder="Specify the companies you'd like to perform analysis. Example: I will like to perform risk assessments on Apple Inc. and Microsoft Corporation, Google LLC"
                     value={companies}
                     onChange={(e) => setCompanies(e.target.value)}
                     className="min-h-[200px]"

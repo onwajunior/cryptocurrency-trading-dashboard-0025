@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ArrowRight, BarChart3, TrendingUp, Shield, FileText, Users, Zap } from "lucide-react";
+import riskBuddyLogo from "@/assets/risk-buddy-logo.png";
 
 const Index = () => {
   return (
@@ -11,8 +12,8 @@ const Index = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16 items-center">
             <div className="flex items-center">
-              <BarChart3 className="h-8 w-8 text-primary mr-2" />
-              <span className="text-xl font-bold">RiskAnalyzer</span>
+              <img src={riskBuddyLogo} alt="Risk buddy" className="h-8 w-8 mr-2" />
+              <span className="text-xl font-bold">Risk buddy</span>
             </div>
             <div className="flex items-center space-x-4">
               <Button variant="ghost">Features</Button>
@@ -190,8 +191,8 @@ const Index = () => {
         <div className="max-w-7xl mx-auto">
           <div className="flex flex-col md:flex-row justify-between items-center">
             <div className="flex items-center mb-4 md:mb-0">
-              <BarChart3 className="h-6 w-6 text-primary mr-2" />
-              <span className="font-semibold">RiskAnalyzer</span>
+              <img src={riskBuddyLogo} alt="Risk buddy" className="h-6 w-6 mr-2" />
+              <span className="font-semibold">Risk buddy</span>
             </div>
             <div className="flex space-x-6">
               <a href="#" className="text-muted-foreground hover:text-foreground">

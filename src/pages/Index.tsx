@@ -3,17 +3,15 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { ArrowRight, BarChart3, TrendingUp, Shield, FileText, Users, Zap } from "lucide-react";
 import riskBuddyLogo from "@/assets/risk-buddy-logo.png";
-
 const Index = () => {
-  return (
-    <div className="min-h-screen bg-background">
+  return <div className="min-h-screen bg-background">
       {/* Navigation */}
       <nav className="border-b border-border">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16 items-center">
             <div className="flex items-center">
               <img src={riskBuddyLogo} alt="Risk buddy" className="h-8 w-8 mr-2" />
-              <span className="text-xl font-bold">Risk buddy</span>
+              <span className="text-xl font-bold">Risk Buddy</span>
             </div>
             <div className="flex items-center space-x-4">
               <Button variant="ghost">Features</Button>
@@ -208,8 +206,6 @@ const Index = () => {
           </div>
         </div>
       </footer>
-    </div>
-  );
+    </div>;
 };
-
 export default Index;

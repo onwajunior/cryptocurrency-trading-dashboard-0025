@@ -2,14 +2,79 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  /* Core colors with HSL values */
+  --background: 210 20% 8%;
+  --foreground: 210 20% 98%;
+  --card: 210 20% 10%;
+  --card-foreground: 210 20% 98%;
+  --popover: 210 20% 10%;
+  --popover-foreground: 210 20% 98%;
+  --primary: 263 85% 70%;
+  --primary-foreground: 210 20% 98%;
+  --secondary: 210 20% 15%;
+  --secondary-foreground: 210 20% 98%;
+  --muted: 210 20% 20%;
+  --muted-foreground: 210 20% 70%;
+  --accent: 263 85% 70%;
+  --accent-foreground: 210 20% 98%;
+  --destructive: 0 84% 60%;
+  --destructive-foreground: 210 20% 98%;
+  --border: 210 20% 20%;
+  --input: 210 20% 18%;
+  --ring: 263 85% 70%;
+  --success: 142 76% 36%;
+  --warning: 25 95% 53%;
+  
+  /* Custom gradients */
+  --gradient-primary: linear-gradient(135deg, hsl(263, 85%, 70%), hsl(280, 85%, 80%));
+  --gradient-secondary: linear-gradient(135deg, hsl(210, 20%, 10%), hsl(210, 20%, 15%));
+  --gradient-hero: linear-gradient(135deg, hsl(210, 20%, 8%) 0%, hsl(263, 85%, 20%) 50%, hsl(210, 20%, 8%) 100%);
+  
+  /* Glass morphism */
+  --glass-bg: hsla(210, 20%, 15%, 0.7);
+  --glass-border: hsla(210, 20%, 50%, 0.2);
+  
+  /* Shadows with color */
+  --shadow-primary: 0 10px 40px -10px hsla(263, 85%, 70%, 0.3);
+  --shadow-card: 0 8px 32px -8px hsla(210, 20%, 0%, 0.4);
+}
+
 @layer base {
+  * {
+    @apply border-border;
+  }
+  
   body {
     @apply bg-background text-foreground antialiased;
+    background: var(--gradient-hero);
+    background-attachment: fixed;
   }
 }
 
-.glass-card {
-  @apply bg-secondary bg-opacity-20 backdrop-blur-lg border border-white border-opacity-10 shadow-lg;
+@layer components {
+  .glass-card {
+    background: var(--glass-bg);
+    backdrop-filter: blur(20px);
+    border: 1px solid var(--glass-border);
+    box-shadow: var(--shadow-card);
+  }
+  
+  .gradient-text {
+    background: var(--gradient-primary);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  
+  .card-hover {
+    @apply transition-all duration-300 hover:scale-105;
+    box-shadow: var(--shadow-card);
+  }
+  
+  .card-hover:hover {
+    box-shadow: var(--shadow-primary);
+  }
 }
 
 .crypto-chart {
@@ -27,4 +92,17 @@
 
 .animate-pulse-subtle {
   animation: pulse-subtle 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+.animate-float {
+  animation: float 6s ease-in-out infinite;
 }

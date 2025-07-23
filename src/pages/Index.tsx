@@ -6,18 +6,18 @@ import riskBuddyLogo from "@/assets/risk-buddy-logo.png";
 const Index = () => {
   return <div className="min-h-screen bg-background">
       {/* Navigation */}
-      <nav className="border-b border-border">
+      <nav className="glass-card border-b-0">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16 items-center">
             <div className="flex items-center">
-              <Shield className="h-8 w-8 mr-2 text-primary" />
-              <span className="text-xl font-bold">Risk Buddy</span>
+              <Shield className="h-8 w-8 mr-2 text-primary animate-float" />
+              <span className="text-xl font-bold gradient-text">Risk Buddy</span>
             </div>
             <div className="flex items-center space-x-4">
-              <Button variant="ghost">Features</Button>
-              <Button variant="ghost">Pricing</Button>
-              <Button variant="outline">Sign In</Button>
-              <Button>Get Started</Button>
+              <Button variant="ghost" className="hover:bg-primary/10">Features</Button>
+              <Button variant="ghost" className="hover:bg-primary/10">Pricing</Button>
+              <Button variant="outline" className="border-primary/30 hover:bg-primary/10">Sign In</Button>
+              <Button className="bg-primary hover:bg-primary/90 shadow-lg">Get Started</Button>
             </div>
           </div>
         </div>
@@ -29,7 +29,7 @@ const Index = () => {
           <Badge className="mb-4" variant="secondary">
             AI-Powered Financial Analysis
           </Badge>
-          <h1 className="text-4xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-foreground to-muted-foreground bg-clip-text text-transparent">
+          <h1 className="text-4xl md:text-6xl font-bold mb-6 gradient-text">
             Comprehensive Financial Risk Assessment for Any Company
           </h1>
           <p className="text-xl text-muted-foreground mb-8 max-w-3xl mx-auto">
@@ -60,7 +60,7 @@ const Index = () => {
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            <Card className="border-border">
+            <Card className="glass-card card-hover">
               <CardHeader>
                 <TrendingUp className="h-12 w-12 text-primary mb-4" />
                 <CardTitle>AI-Powered Analysis</CardTitle>
@@ -70,7 +70,7 @@ const Index = () => {
               </CardHeader>
             </Card>
 
-            <Card className="border-border">
+            <Card className="glass-card card-hover">
               <CardHeader>
                 <BarChart3 className="h-12 w-12 text-success mb-4" />
                 <CardTitle>Interactive Charts</CardTitle>
@@ -80,7 +80,7 @@ const Index = () => {
               </CardHeader>
             </Card>
 
-            <Card className="border-border">
+            <Card className="glass-card card-hover">
               <CardHeader>
                 <Shield className="h-12 w-12 text-warning mb-4" />
                 <CardTitle>Risk Metrics</CardTitle>
@@ -90,7 +90,7 @@ const Index = () => {
               </CardHeader>
             </Card>
 
-            <Card className="border-border">
+            <Card className="glass-card card-hover">
               <CardHeader>
                 <FileText className="h-12 w-12 text-primary mb-4" />
                 <CardTitle>Batch Analysis</CardTitle>
@@ -100,7 +100,7 @@ const Index = () => {
               </CardHeader>
             </Card>
 
-            <Card className="border-border">
+            <Card className="glass-card card-hover">
               <CardHeader>
                 <Users className="h-12 w-12 text-success mb-4" />
                 <CardTitle>Analysis Library</CardTitle>
@@ -110,7 +110,7 @@ const Index = () => {
               </CardHeader>
             </Card>
 
-            <Card className="border-border">
+            <Card className="glass-card card-hover">
               <CardHeader>
                 <Zap className="h-12 w-12 text-warning mb-4" />
                 <CardTitle>Export & Share</CardTitle>

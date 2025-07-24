@@ -13,9 +13,12 @@ serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
   }
 
+  let assessmentId = null;
+  
   try {
     const requestBody = await req.json();
-    const { companies, assessmentId } = requestBody;
+    const { companies } = requestBody;
+    assessmentId = requestBody.assessmentId;
     
     if (!companies || !Array.isArray(companies) || companies.length === 0) {
       throw new Error('Companies array is required');
@@ -32,10 +35,12 @@ serve(async (req) => {
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
     // Update assessment status to processing
-    await supabase
-      .from('assessments')
-      .update({ status: 'processing' })
-      .eq('id', assessmentId);
+    if (assessmentId) {
+      await supabase
+        .from('assessments')
+        .update({ status: 'processing' })
+        .eq('id', assessmentId);
+    }
 
     console.log(`Starting financial analysis for companies: ${companies.join(', ')}`);
 
@@ -199,13 +204,15 @@ Please be as detailed as possible while using actual financial data where availa
     }
 
     // Update assessment with results
-    await supabase
-      .from('assessments')
-      .update({ 
-        status: 'completed',
-        results: analysisResults
-      })
-      .eq('id', assessmentId);
+    if (assessmentId) {
+      await supabase
+        .from('assessments')
+        .update({ 
+          status: 'completed',
+          results: analysisResults
+        })
+        .eq('id', assessmentId);
+    }
 
     console.log('Financial analysis completed successfully');
 
@@ -219,12 +226,9 @@ Please be as detailed as possible while using actual financial data where availa
   } catch (error) {
     console.error('Error in financial analysis:', error);
     
-    // Try to update assessment status to failed if we have access to the original request
-    try {
-      const requestBody = await req.json();
-      const { assessmentId } = requestBody;
-      
-      if (assessmentId) {
+    // Try to update assessment status to failed
+    if (assessmentId) {
+      try {
         const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
         const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
         const supabase = createClient(supabaseUrl, supabaseServiceKey);
@@ -233,9 +237,9 @@ Please be as detailed as possible while using actual financial data where availa
           .from('assessments')
           .update({ status: 'failed' })
           .eq('id', assessmentId);
+      } catch (updateError) {
+        console.error('Failed to update assessment status:', updateError);
       }
-    } catch (updateError) {
-      console.error('Failed to update assessment status:', updateError);
     }
 
     return new Response(JSON.stringify({ 

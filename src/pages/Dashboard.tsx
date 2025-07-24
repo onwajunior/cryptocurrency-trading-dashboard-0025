@@ -103,10 +103,17 @@ const Dashboard = () => {
     try {
       setCurrentStep('analyzing');
 
+      // Get current user
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        throw new Error('User not authenticated');
+      }
+
       // Create assessment record
       const { data: assessment, error } = await supabase
         .from('assessments')
         .insert({
+          user_id: user.id,
           name: `Risk Assessment - ${new Date().toLocaleDateString()}`,
           companies: confirmedCompanies,
           status: 'pending'

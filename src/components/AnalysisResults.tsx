@@ -62,6 +62,34 @@ const AnalysisResults = ({ results, assessmentId, onSave, onDelete }: AnalysisRe
     }
   };
 
+  const getStatusBadgeStyle = (status: string) => {
+    const statusLower = status?.toLowerCase();
+    switch (statusLower) {
+      case 'success':
+      case 'excellent':
+      case 'safe':
+      case 'safe zone':
+        return 'bg-green-600 text-white hover:bg-green-700';
+      case 'good':
+      case 'low':
+        return 'bg-green-400 text-white hover:bg-green-500';
+      case 'medium':
+      case 'fair':
+      case 'grey':
+      case 'grey zone':
+        return 'bg-yellow-500 text-white hover:bg-yellow-600';
+      case 'poor':
+      case 'high':
+        return 'bg-orange-500 text-white hover:bg-orange-600';
+      case 'critical':
+      case 'distress':
+      case 'distress zone':
+        return 'bg-red-600 text-white hover:bg-red-700';
+      default:
+        return 'bg-muted text-muted-foreground hover:bg-muted/80';
+    }
+  };
+
   const getRiskBadgeVariant = (level: string) => {
     switch (level?.toLowerCase()) {
       case 'low': return 'default';
@@ -141,7 +169,7 @@ const AnalysisResults = ({ results, assessmentId, onSave, onDelete }: AnalysisRe
             </CardTitle>
             {results.ai_status && (
               <div className="flex items-center gap-2">
-                <Badge variant={results.ai_status === 'success' ? 'default' : 'destructive'}>
+                <Badge className={getStatusBadgeStyle(results.ai_status)}>
                   {results.ai_status}
                 </Badge>
                 {results.ai_error && (
@@ -172,7 +200,7 @@ const AnalysisResults = ({ results, assessmentId, onSave, onDelete }: AnalysisRe
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <h4 className="font-medium mb-2">Average Risk Level</h4>
-                <Badge variant={getRiskBadgeVariant(results.portfolio_summary.average_risk_level)}>
+                <Badge className={getStatusBadgeStyle(results.portfolio_summary.average_risk_level)}>
                   {results.portfolio_summary.average_risk_level?.toUpperCase() || 'Unknown'}
                 </Badge>
               </div>
@@ -191,6 +219,63 @@ const AnalysisResults = ({ results, assessmentId, onSave, onDelete }: AnalysisRe
                 </p>
               </div>
             )}
+            
+            {/* 5-Year Z-Score Trend Chart */}
+            {results.portfolio_summary?.zscore_trend && results.portfolio_summary.zscore_trend.length > 0 && (
+              <div className="mt-6">
+                <h4 className="font-medium mb-4">5-Year Z-Score Trend</h4>
+                <div className="h-64">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <LineChart data={results.portfolio_summary.zscore_trend}>
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis dataKey="year" />
+                      <YAxis domain={[0, 'dataMax + 1']} />
+                      <Tooltip 
+                        formatter={(value: number) => [value?.toFixed(2), 'Z-Score']}
+                        labelFormatter={(label) => `Year: ${label}`}
+                      />
+                      <Line 
+                        type="monotone" 
+                        dataKey="zscore" 
+                        stroke="hsl(var(--primary))" 
+                        strokeWidth={3}
+                        dot={{ fill: "hsl(var(--primary))", strokeWidth: 2, r: 6 }}
+                        activeDot={{ r: 8, stroke: "hsl(var(--primary))", strokeWidth: 2 }}
+                      />
+                      {/* Add reference lines for Z-Score zones */}
+                      <Line 
+                        type="monotone" 
+                        dataKey={() => 3.0} 
+                        stroke="#22c55e" 
+                        strokeDasharray="5 5" 
+                        strokeWidth={2}
+                        dot={false}
+                        legendType="none"
+                      />
+                      <Line 
+                        type="monotone" 
+                        dataKey={() => 1.8} 
+                        stroke="#ef4444" 
+                        strokeDasharray="5 5" 
+                        strokeWidth={2}
+                        dot={false}
+                        legendType="none"
+                      />
+                    </LineChart>
+                  </ResponsiveContainer>
+                </div>
+                <div className="flex justify-center gap-4 mt-2 text-xs text-muted-foreground">
+                  <div className="flex items-center gap-1">
+                    <div className="w-3 h-0.5 bg-green-500"></div>
+                    <span>Safe Zone (&gt;3.0)</span>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <div className="w-3 h-0.5 bg-red-500"></div>
+                    <span>Distress Zone (&lt;1.8)</span>
+                  </div>
+                </div>
+              </div>
+            )}
           </CardContent>
         </Card>
       )}
@@ -204,7 +289,7 @@ const AnalysisResults = ({ results, assessmentId, onSave, onDelete }: AnalysisRe
                 <div>
                   <CardTitle className="text-xl">{company.name}</CardTitle>
                   {company.overall_rating && (
-                    <Badge className={`mt-2 ${getRatingColor(company.overall_rating)}`}>
+                    <Badge className={`mt-2 ${getStatusBadgeStyle(company.overall_rating)}`}>
                       {company.overall_rating.toUpperCase()}
                     </Badge>
                   )}
@@ -213,10 +298,7 @@ const AnalysisResults = ({ results, assessmentId, onSave, onDelete }: AnalysisRe
                   <div className="text-right">
                     <p className="text-sm text-muted-foreground">Altman Z-Score</p>
                     <p className="text-2xl font-bold">{company.altman_z_score.score.toFixed(2)}</p>
-                    <Badge variant={
-                      company.altman_z_score.zone === 'safe' ? 'default' :
-                      company.altman_z_score.zone === 'grey' ? 'secondary' : 'destructive'
-                    }>
+                    <Badge className={getStatusBadgeStyle(company.altman_z_score.zone)}>
                       {company.altman_z_score.zone?.toUpperCase()}
                     </Badge>
                   </div>
@@ -354,7 +436,7 @@ const AnalysisResults = ({ results, assessmentId, onSave, onDelete }: AnalysisRe
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                           <h4 className="font-medium mb-2">Credit Risk Level</h4>
-                          <Badge variant={getRiskBadgeVariant(company.risk_assessment.credit_risk_level)}>
+                          <Badge className={getStatusBadgeStyle(company.risk_assessment.credit_risk_level)}>
                             {company.risk_assessment.credit_risk_level?.toUpperCase() || 'Unknown'}
                           </Badge>
                         </div>
@@ -397,10 +479,7 @@ const AnalysisResults = ({ results, assessmentId, onSave, onDelete }: AnalysisRe
                       {/* Z-Score Overview */}
                       <div className="text-center p-4 bg-muted/50 rounded-lg">
                         <h3 className="text-2xl font-bold mb-2">Altman Z-Score: {company.altman_z_score.score?.toFixed(2)}</h3>
-                        <Badge variant={
-                          company.altman_z_score.zone === 'safe' ? 'default' :
-                          company.altman_z_score.zone === 'grey' ? 'secondary' : 'destructive'
-                        } className="text-sm">
+                        <Badge className={`text-sm ${getStatusBadgeStyle(company.altman_z_score.zone + ' zone')}`}>
                           {company.altman_z_score.zone?.toUpperCase()} ZONE
                         </Badge>
                       </div>
@@ -476,73 +555,6 @@ const AnalysisResults = ({ results, assessmentId, onSave, onDelete }: AnalysisRe
 
                 <TabsContent value="summary">
                   <div className="space-y-6">
-                    {/* Z-Score Trend Chart */}
-                    {company.altman_z_score?.historical_trend && (
-                      <div>
-                        <h4 className="font-medium mb-4">5-Year Z-Score Trend</h4>
-                        <div className="h-64 w-full">
-                          <ResponsiveContainer width="100%" height="100%">
-                            <LineChart data={company.altman_z_score.historical_trend}>
-                              <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
-                              <XAxis 
-                                dataKey="year" 
-                                className="text-xs"
-                              />
-                              <YAxis 
-                                className="text-xs"
-                                domain={['dataMin - 0.5', 'dataMax + 0.5']}
-                              />
-                              <Tooltip 
-                                contentStyle={{
-                                  backgroundColor: 'hsl(var(--card))',
-                                  border: '1px solid hsl(var(--border))',
-                                  borderRadius: '6px'
-                                }}
-                                labelStyle={{ color: 'hsl(var(--foreground))' }}
-                              />
-                              <Line 
-                                type="monotone" 
-                                dataKey="z_score" 
-                                stroke="hsl(var(--primary))" 
-                                strokeWidth={3}
-                                dot={{ fill: 'hsl(var(--primary))', strokeWidth: 2, r: 5 }}
-                                activeDot={{ r: 7, fill: 'hsl(var(--primary))' }}
-                              />
-                              {/* Safe zone reference line */}
-                              <Line 
-                                type="monotone" 
-                                dataKey={() => 2.99} 
-                                stroke="hsl(var(--green-600))" 
-                                strokeDasharray="5 5"
-                                strokeWidth={1}
-                                dot={false}
-                                activeDot={false}
-                              />
-                              {/* Distress zone reference line */}
-                              <Line 
-                                type="monotone" 
-                                dataKey={() => 1.8} 
-                                stroke="hsl(var(--red-600))" 
-                                strokeDasharray="5 5"
-                                strokeWidth={1}
-                                dot={false}
-                                activeDot={false}
-                              />
-                            </LineChart>
-                          </ResponsiveContainer>
-                        </div>
-                        <div className="flex justify-center gap-4 text-xs text-muted-foreground mt-2">
-                          <div className="flex items-center gap-1">
-                            <div className="w-4 h-px bg-green-600"></div>
-                            <span>Safe Zone (&gt;2.99)</span>
-                          </div>
-                          <div className="flex items-center gap-1">
-                            <div className="w-4 h-px bg-red-600"></div>
-                            <span>Distress Zone (&lt;1.8)</span>
-                          </div>
-                        </div>
-                      </div>
-                    )}
 
                     {company.key_strengths && (
                       <div>

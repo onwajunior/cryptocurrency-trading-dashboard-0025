@@ -192,7 +192,7 @@ const AnalysisResults = ({ results, assessmentId, assessmentName, onSave, onDele
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <AlertCircle className="h-5 w-5" />
-              AI Financial Analysis
+              Financial Risk Analysis
             </CardTitle>
             {results.ai_status && (
               <div className="flex items-center gap-2">

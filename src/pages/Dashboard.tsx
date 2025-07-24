@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Upload, FileText, History, Loader2 } from "lucide-react";
+import { Upload, FileText, History, Loader2, Download, Trash2, Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
@@ -9,6 +9,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { parseFile, parseCompaniesFromText } from "@/lib/fileParser";
 import CompanyConfirmation from "@/components/CompanyConfirmation";
 import AnalysisResults from "@/components/AnalysisResults";
+import { generatePDF } from "@/lib/pdfGenerator";
 
 import React from "react";
 
@@ -109,6 +110,25 @@ const Dashboard = () => {
         throw new Error('User not authenticated');
       }
 
+      // Check current assessment count and delete oldest if necessary
+      const { data: existingAssessments, error: countError } = await supabase
+        .from('assessments')
+        .select('id, created_at')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: true });
+
+      if (countError) throw countError;
+
+      // If we have 5 or more assessments, delete the oldest
+      if (existingAssessments && existingAssessments.length >= 5) {
+        const { error: deleteError } = await supabase
+          .from('assessments')
+          .delete()
+          .eq('id', existingAssessments[0].id);
+
+        if (deleteError) throw deleteError;
+      }
+
       // Create assessment record
       const { data: assessment, error } = await supabase
         .from('assessments')
@@ -187,12 +207,64 @@ const Dashboard = () => {
       const { data, error } = await supabase
         .from('assessments')
         .select('*')
-        .order('created_at', { ascending: false });
+        .order('created_at', { ascending: false })
+        .limit(5);
 
       if (error) throw error;
       setAssessments(data || []);
     } catch (error) {
       console.error('Failed to load assessments:', error);
+    }
+  };
+
+  const handleDeleteAssessment = async (assessmentId: string) => {
+    try {
+      const { error } = await supabase
+        .from('assessments')
+        .delete()
+        .eq('id', assessmentId);
+
+      if (error) throw error;
+
+      toast({
+        title: "Assessment Deleted",
+        description: "The assessment has been successfully removed.",
+      });
+
+      loadAssessments();
+    } catch (error) {
+      console.error('Error deleting assessment:', error);
+      toast({
+        title: "Error",
+        description: "Failed to delete assessment. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleDownloadAssessment = async (assessment: any) => {
+    try {
+      if (!assessment.results) {
+        toast({
+          title: "No Results",
+          description: "This assessment doesn't have results to download.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      await generatePDF(assessment.results, assessment.name);
+      toast({
+        title: "PDF Downloaded",
+        description: "The assessment report has been downloaded successfully.",
+      });
+    } catch (error) {
+      console.error('Error downloading assessment:', error);
+      toast({
+        title: "Error",
+        description: "Failed to download assessment. Please try again.",
+        variant: "destructive",
+      });
     }
   };
 
@@ -321,6 +393,7 @@ const Dashboard = () => {
                 <AnalysisResults
                   results={analysisResults}
                   assessmentId={currentAssessmentId}
+                  assessmentName={assessments.find(a => a.id === currentAssessmentId)?.name || `Risk Assessment - ${new Date().toLocaleDateString()}`}
                   onSave={handleSaveResults}
                   onDelete={handleDeleteResults}
                 />
@@ -367,18 +440,40 @@ const Dashboard = () => {
                                 {assessment.status.charAt(0).toUpperCase() + assessment.status.slice(1)}
                               </span>
                               {assessment.status === "completed" && (
-                                <Button 
-                                  variant="outline" 
-                                  size="sm"
-                                  onClick={() => {
-                                    setAnalysisResults(assessment.results);
-                                    setCurrentAssessmentId(assessment.id);
-                                    setCurrentStep('results');
-                                    setActiveTab('assessment');
-                                  }}
-                                >
-                                  View Report
-                                </Button>
+                                <div className="flex gap-1">
+                                  <Button 
+                                    variant="outline" 
+                                    size="sm"
+                                    onClick={() => {
+                                      setAnalysisResults(assessment.results);
+                                      setCurrentAssessmentId(assessment.id);
+                                      setCurrentStep('results');
+                                      setActiveTab('assessment');
+                                    }}
+                                    className="flex items-center gap-1"
+                                  >
+                                    <Eye className="h-3 w-3" />
+                                    View
+                                  </Button>
+                                  <Button 
+                                    variant="outline" 
+                                    size="sm"
+                                    onClick={() => handleDownloadAssessment(assessment)}
+                                    className="flex items-center gap-1"
+                                  >
+                                    <Download className="h-3 w-3" />
+                                    Download
+                                  </Button>
+                                  <Button 
+                                    variant="outline" 
+                                    size="sm"
+                                    onClick={() => handleDeleteAssessment(assessment.id)}
+                                    className="flex items-center gap-1 text-destructive hover:bg-destructive/10"
+                                  >
+                                    <Trash2 className="h-3 w-3" />
+                                    Delete
+                                  </Button>
+                                </div>
                               )}
                             </div>
                           </div>

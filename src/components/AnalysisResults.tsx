@@ -9,15 +9,17 @@ import { Save, Trash2, Download, TrendingUp, TrendingDown, AlertCircle } from "l
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { generatePDF } from "@/lib/pdfGenerator";
 
 interface AnalysisResultsProps {
   results: any;
   assessmentId: string;
+  assessmentName?: string;
   onSave: () => void;
   onDelete: () => void;
 }
 
-const AnalysisResults = ({ results, assessmentId, onSave, onDelete }: AnalysisResultsProps) => {
+const AnalysisResults = ({ results, assessmentId, assessmentName, onSave, onDelete }: AnalysisResultsProps) => {
   const [isSaving, setIsSaving] = useState(false);
   const { toast } = useToast();
 
@@ -57,6 +59,23 @@ const AnalysisResults = ({ results, assessmentId, onSave, onDelete }: AnalysisRe
       toast({
         title: "Error",
         description: "Failed to delete assessment. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleDownload = async () => {
+    try {
+      await generatePDF(results, assessmentName || 'Financial Analysis');
+      toast({
+        title: "PDF Generated",
+        description: "The analysis report has been downloaded successfully.",
+      });
+    } catch (error) {
+      console.error('Error generating PDF:', error);
+      toast({
+        title: "Error",
+        description: "Failed to generate PDF. Please try again.",
         variant: "destructive",
       });
     }
@@ -138,6 +157,14 @@ const AnalysisResults = ({ results, assessmentId, onSave, onDelete }: AnalysisRe
               </p>
             </div>
             <div className="flex gap-2">
+              <Button
+                variant="outline"
+                onClick={handleDownload}
+                className="flex items-center gap-2"
+              >
+                <Download className="h-4 w-4" />
+                Download PDF
+              </Button>
               <Button
                 variant="outline"
                 onClick={handleDelete}

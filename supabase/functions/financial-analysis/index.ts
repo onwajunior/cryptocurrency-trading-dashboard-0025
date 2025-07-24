@@ -28,33 +28,9 @@ serve(async (req) => {
       throw new Error('Anthropic API key not configured');
     }
 
-    console.log('Starting Claude API call...');
+    console.log('Testing simple Claude API call...');
 
-    // Create a simpler prompt for Claude
-    const prompt = `Analyze the financial risk for these companies: ${companies.join(', ')}.
-
-Please provide a structured analysis for each company including:
-- Overall financial health rating (excellent/good/fair/poor/critical)
-- Key strengths and weaknesses
-- Risk level (low/medium/high)
-- Brief recommendations
-
-Format as JSON:
-{
-  "analysis_date": "${new Date().toISOString().split('T')[0]}",
-  "companies": [
-    {
-      "name": "Company Name",
-      "overall_rating": "good",
-      "risk_level": "medium",
-      "key_strengths": ["strength1", "strength2"],
-      "key_weaknesses": ["weakness1", "weakness2"],
-      "recommendations": "brief recommendations"
-    }
-  ]
-}`;
-
-    // Call Claude API
+    // Very simple test call to Claude
     const response = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: {
@@ -64,54 +40,40 @@ Format as JSON:
       },
       body: JSON.stringify({
         model: 'claude-3-5-sonnet-20241022',
-        max_tokens: 4000,
+        max_tokens: 100,
         messages: [
           {
             role: 'user',
-            content: prompt
+            content: 'Say hello'
           }
         ],
       }),
     });
 
+    console.log('Claude API response status:', response.status);
+
     if (!response.ok) {
       const errorText = await response.text();
-      console.error('Claude API error:', response.status, errorText);
-      throw new Error(`Claude API error: ${response.status}`);
+      console.error('Claude API error:', errorText);
+      throw new Error(`Claude API error: ${response.status} - ${errorText}`);
     }
 
     const data = await response.json();
-    const analysisText = data.content[0].text;
-    
-    console.log('Claude response received, parsing...');
-    
-    // Try to parse Claude's JSON response
-    let analysisResults;
-    try {
-      const jsonMatch = analysisText.match(/```json\n([\s\S]*?)\n```/) || 
-                       analysisText.match(/\{[\s\S]*\}/);
-      
-      if (jsonMatch) {
-        analysisResults = JSON.parse(jsonMatch[1] || jsonMatch[0]);
-      } else {
-        throw new Error('No JSON found in Claude response');
-      }
-    } catch (parseError) {
-      console.error('Failed to parse Claude response:', parseError);
-      // Fallback to mock data if parsing fails
-      analysisResults = {
-        analysis_date: new Date().toISOString().split('T')[0],
-        companies: companies.map(company => ({
-          name: company,
-          overall_rating: 'good',
-          risk_level: 'medium',
-          key_strengths: ['Market presence', 'Financial stability'],
-          key_weaknesses: ['Market volatility', 'Competition'],
-          recommendations: 'Continue monitoring financial metrics',
-          raw_response: analysisText.substring(0, 500)
-        }))
-      };
-    }
+    console.log('Claude API call successful');
+
+    // Return simple results for now
+    const analysisResults = {
+      analysis_date: new Date().toISOString().split('T')[0],
+      companies: companies.map(company => ({
+        name: company,
+        overall_rating: 'good',
+        risk_level: 'medium',
+        key_strengths: ['Market presence', 'Financial stability'],
+        key_weaknesses: ['Market volatility', 'Competition'],
+        recommendations: 'Continue monitoring financial metrics',
+        claude_test: data.content[0].text
+      }))
+    };
 
     console.log('Analysis completed successfully');
 

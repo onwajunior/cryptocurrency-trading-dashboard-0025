@@ -63,19 +63,25 @@ serve(async (req) => {
       claudeText = `Claude API error: ${claudeResponse.status} - ${errorText}`;
     }
     
-    // Create structured results
+    // Create structured results with Claude analysis
     const results = {
       analysis_date: new Date().toISOString().split('T')[0],
+      claude_status: claudeResponse.ok ? 'success' : 'failed',
+      claude_analysis: claudeText,
       companies: companies.map(company => ({
         name: company,
-        overall_rating: 'good',
-        risk_level: 'medium', 
+        overall_rating: claudeResponse.ok ? 'analyzed' : 'pending', 
+        risk_level: 'medium',
         key_strengths: ['Market presence', 'Financial stability'],
         key_weaknesses: ['Market volatility', 'Competition'],
-        recommendations: 'Continue monitoring financial metrics'
+        recommendations: claudeResponse.ok ? 'See Claude analysis above' : 'Analysis pending - Claude API issue',
+        claude_working: claudeResponse.ok
       })),
-      claude_analysis: claudeText,
-      status: 'completed'
+      debug_info: {
+        claude_response_status: claudeResponse.status,
+        api_key_length: anthropicKey?.length || 0,
+        timestamp: new Date().toISOString()
+      }
     };
 
     return new Response(JSON.stringify({ 

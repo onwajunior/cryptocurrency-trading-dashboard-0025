@@ -14,7 +14,8 @@ serve(async (req) => {
   }
 
   try {
-    const { companies, assessmentId } = await req.json();
+    const requestBody = await req.json();
+    const { companies, assessmentId } = requestBody;
     
     if (!companies || !Array.isArray(companies) || companies.length === 0) {
       throw new Error('Companies array is required');
@@ -154,7 +155,9 @@ Please be as detailed as possible while using actual financial data where availa
     });
 
     if (!response.ok) {
-      throw new Error(`Claude API error: ${response.status}`);
+      const errorText = await response.text();
+      console.error('Claude API error response:', errorText);
+      throw new Error(`Claude API error: ${response.status} - ${errorText}`);
     }
 
     const data = await response.json();
@@ -216,9 +219,11 @@ Please be as detailed as possible while using actual financial data where availa
   } catch (error) {
     console.error('Error in financial analysis:', error);
     
-    // Try to update assessment status to failed if we have the assessmentId
+    // Try to update assessment status to failed if we have access to the original request
     try {
-      const { assessmentId } = await req.json();
+      const requestBody = await req.json();
+      const { assessmentId } = requestBody;
+      
       if (assessmentId) {
         const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
         const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;

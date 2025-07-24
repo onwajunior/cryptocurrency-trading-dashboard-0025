@@ -1,3 +1,5 @@
+import * as XLSX from 'xlsx';
+
 export interface CompanyList {
   companies: string[];
   source: 'file' | 'manual';
@@ -67,6 +69,43 @@ export const parseTXTFile = (file: File): Promise<string[]> => {
   });
 };
 
+export const parseExcelFile = (file: File): Promise<string[]> => {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const data = new Uint8Array(e.target?.result as ArrayBuffer);
+        const workbook = XLSX.read(data, { type: 'array' });
+        
+        const companies: string[] = [];
+        
+        // Process all worksheets
+        workbook.SheetNames.forEach(sheetName => {
+          const worksheet = workbook.Sheets[sheetName];
+          const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+          
+          // Extract text from all cells
+          jsonData.forEach((row: any) => {
+            if (Array.isArray(row)) {
+              row.forEach(cell => {
+                if (cell && typeof cell === 'string' && cell.trim().length > 2) {
+                  companies.push(cell.trim());
+                }
+              });
+            }
+          });
+        });
+        
+        resolve(parseCompaniesFromText(companies.join(', ')));
+      } catch (error) {
+        reject(error);
+      }
+    };
+    reader.onerror = () => reject(new Error('Failed to read Excel file'));
+    reader.readAsArrayBuffer(file);
+  });
+};
+
 export const parseFile = async (file: File): Promise<string[]> => {
   const extension = file.name.split('.').pop()?.toLowerCase();
   
@@ -77,9 +116,7 @@ export const parseFile = async (file: File): Promise<string[]> => {
       return parseTXTFile(file);
     case 'xlsx':
     case 'xls':
-      // For Excel files, we'll treat them as text for now
-      // In a real implementation, you'd use a library like xlsx
-      return parseTXTFile(file);
+      return parseExcelFile(file);
     default:
       throw new Error('Unsupported file type. Please upload a CSV, TXT, or Excel file.');
   }

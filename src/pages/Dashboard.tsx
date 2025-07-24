@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Upload, FileText, History, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -21,7 +21,37 @@ const Dashboard = () => {
   const [analysisResults, setAnalysisResults] = useState<any>(null);
   const [currentAssessmentId, setCurrentAssessmentId] = useState<string | null>(null);
   const [assessments, setAssessments] = useState<any[]>([]);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const { toast } = useToast();
+
+  // Initialize authentication
+  useEffect(() => {
+    const initAuth = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        // Sign in anonymously if no session exists
+        const { error } = await supabase.auth.signInAnonymously();
+        if (error) {
+          console.error('Failed to sign in anonymously:', error);
+          toast({
+            title: "Authentication Error",
+            description: "Failed to initialize session. Please refresh the page.",
+            variant: "destructive"
+          });
+          return;
+        }
+      }
+      setIsAuthenticated(true);
+    };
+
+    initAuth();
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      setIsAuthenticated(!!session);
+    });
+
+    return () => subscription.unsubscribe();
+  }, [toast]);
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];

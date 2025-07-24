@@ -81,7 +81,7 @@ export const generatePDF = async (analysisData: AnalysisData, assessmentName: st
     pdf.text(`Diversification Score: ${analysisData.portfolio_summary.diversification_score}`, 20, yPosition);
     yPosition += 10;
 
-    if (analysisData.portfolio_summary.overall_recommendations?.length > 0) {
+    if (analysisData.portfolio_summary.overall_recommendations && Array.isArray(analysisData.portfolio_summary.overall_recommendations) && analysisData.portfolio_summary.overall_recommendations.length > 0) {
       pdf.setFont(undefined, 'bold');
       pdf.text('Recommendations:', 20, yPosition);
       yPosition += 6;

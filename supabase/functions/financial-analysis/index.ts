@@ -132,7 +132,14 @@ serve(async (req) => {
   "portfolio_summary": {
     "average_risk_level": "low|medium|high",
     "diversification_analysis": "Analysis of portfolio diversification",
-    "overall_recommendations": "Portfolio recommendations"
+    "overall_recommendations": "Portfolio recommendations",
+    "zscore_trend": [
+      {"year": 2020, "zscore": 2.1},
+      {"year": 2021, "zscore": 2.3},
+      {"year": 2022, "zscore": 2.2},
+      {"year": 2023, "zscore": 2.4},
+      {"year": 2024, "zscore": 2.5}
+    ]
   }
 }
 

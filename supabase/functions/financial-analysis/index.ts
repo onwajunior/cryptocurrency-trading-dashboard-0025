@@ -50,11 +50,12 @@ serve(async (req) => {
             content: `Analyze these companies: ${companies.join(', ')}. For each company, determine the appropriate Altman Z-score formula based on company type:
 
 CRITICAL INSTRUCTIONS FOR CONSISTENT RESULTS:
-- Base ALL calculations SOLELY on the most recent full-year (annual) financial statements available
-- DO NOT use partial-year data (quarterly, interim, or YTD figures)
-- DO NOT annualize partial-year data under any circumstances
-- Use only complete 12-month annual reporting periods
-- This ensures consistent results across multiple analysis runs
+- Calculate ALL financial metrics (Altman Z-score, liquidity ratios, solvency ratios, profitability ratios) using ONLY the most recently completed full-year (annual) financial statements
+- DO NOT use, estimate, or annualize partial-year data (quarterly, interim, YTD, or trailing twelve-month figures)
+- DO NOT make projections or estimates from incomplete periods
+- Use only actual values from the latest finalized fiscal year (e.g., if current date is mid-2025, use only 2024 year-end annual report)
+- Base historical trends on completed annual periods only
+- This ensures accurate and consistent results across multiple analysis runs
 
 ALTMAN Z-SCORE FORMULAS BY COMPANY TYPE:
 1. Public Manufacturing Companies: Z = 1.2X₁ + 1.4X₂ + 3.3X₃ + 0.6X₄ + 1.0X₅ (Safe if > 2.99, Grey zone 1.8-2.99, Distress < 1.8)

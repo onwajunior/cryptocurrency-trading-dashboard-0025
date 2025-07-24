@@ -21,27 +21,30 @@ serve(async (req) => {
     }
     
     // Check environment variables
-    const anthropicKey = Deno.env.get('ANTHROPIC_API_KEY');
-    console.log('API key exists:', !!anthropicKey);
+    const openaiKey = Deno.env.get('OPENAI_API_KEY');
+    console.log('API key exists:', !!openaiKey);
     
-    if (!anthropicKey) {
-      throw new Error('Anthropic API key not configured');
+    if (!openaiKey) {
+      throw new Error('OpenAI API key not configured');
     }
 
-    // Now try Claude API call
-    console.log('Calling Claude API...');
+    // Now try OpenAI API call
+    console.log('Calling OpenAI API...');
     
-    const claudeResponse = await fetch('https://api.anthropic.com/v1/messages', {
+    const openaiResponse = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${anthropicKey}`,
+        'Authorization': `Bearer ${openaiKey}`,
         'Content-Type': 'application/json',
-        'anthropic-version': '2023-06-01',
       },
       body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
+        model: 'gpt-4.1-2025-04-14',
         max_tokens: 2000,
         messages: [
+          {
+            role: 'system',
+            content: 'You are a financial analyst providing comprehensive risk assessments for companies.'
+          },
           {
             role: 'user',
             content: `Provide a comprehensive financial risk analysis for these companies: ${companies.join(', ')}. 
@@ -58,37 +61,37 @@ Format your response clearly for each company.`
       }),
     });
 
-    console.log('Claude response status:', claudeResponse.status);
+    console.log('OpenAI response status:', openaiResponse.status);
 
-    let claudeText = '';
-    if (claudeResponse.ok) {
-      const claudeData = await claudeResponse.json();
-      claudeText = claudeData.content[0].text;
-      console.log('Claude response received successfully');
+    let analysisText = '';
+    if (openaiResponse.ok) {
+      const openaiData = await openaiResponse.json();
+      analysisText = openaiData.choices[0].message.content;
+      console.log('OpenAI response received successfully');
     } else {
-      const errorText = await claudeResponse.text();
-      console.error('Claude API error:', claudeResponse.status, errorText);
-      claudeText = `Claude API Error (${claudeResponse.status}): ${errorText}`;
+      const errorText = await openaiResponse.text();
+      console.error('OpenAI API error:', openaiResponse.status, errorText);
+      analysisText = `OpenAI API Error (${openaiResponse.status}): ${errorText}`;
     }
     
-    // Create structured results with Claude analysis
+    // Create structured results with OpenAI analysis
     const results = {
       analysis_date: new Date().toISOString().split('T')[0],
-      claude_status: claudeResponse.ok ? 'success' : 'failed',
-      claude_error: claudeResponse.ok ? null : `Status: ${claudeResponse.status}`,
-      claude_analysis: claudeText,
+      ai_status: openaiResponse.ok ? 'success' : 'failed',
+      ai_error: openaiResponse.ok ? null : `Status: ${openaiResponse.status}`,
+      analysis: analysisText,
       companies: companies.map(company => ({
         name: company,
-        overall_rating: claudeResponse.ok ? 'analyzed' : 'error', 
-        risk_level: claudeResponse.ok ? 'medium' : 'unknown',
-        key_strengths: claudeResponse.ok ? ['Market presence', 'Financial stability'] : ['Claude API Error'],
-        key_weaknesses: claudeResponse.ok ? ['Market volatility', 'Competition'] : ['Analysis failed'],
-        recommendations: claudeResponse.ok ? 'See Claude analysis above' : claudeText.substring(0, 100) + '...',
-        claude_working: claudeResponse.ok
+        overall_rating: openaiResponse.ok ? 'analyzed' : 'error', 
+        risk_level: openaiResponse.ok ? 'medium' : 'unknown',
+        key_strengths: openaiResponse.ok ? ['Market presence', 'Financial stability'] : ['OpenAI API Error'],
+        key_weaknesses: openaiResponse.ok ? ['Market volatility', 'Competition'] : ['Analysis failed'],
+        recommendations: openaiResponse.ok ? 'See analysis above' : analysisText.substring(0, 100) + '...',
+        ai_working: openaiResponse.ok
       })),
       debug_info: {
-        claude_response_status: claudeResponse.status,
-        api_key_length: anthropicKey?.length || 0,
+        ai_response_status: openaiResponse.status,
+        api_key_length: openaiKey?.length || 0,
         timestamp: new Date().toISOString()
       }
     };

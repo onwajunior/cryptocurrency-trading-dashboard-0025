@@ -16,21 +16,11 @@ serve(async (req) => {
   let assessmentId = null;
   
   try {
-    // Debug: Check what environment variables are available
-    console.log('Environment variables check:');
-    console.log('ANTHROPIC_API_KEY exists:', !!Deno.env.get('ANTHROPIC_API_KEY'));
-    console.log('SUPABASE_URL exists:', !!Deno.env.get('SUPABASE_URL'));
-    console.log('SUPABASE_SERVICE_ROLE_KEY exists:', !!Deno.env.get('SUPABASE_SERVICE_ROLE_KEY'));
-    console.log('SUPABASE_ANON_KEY exists:', !!Deno.env.get('SUPABASE_ANON_KEY'));
-    
     const requestBody = await req.json();
-    console.log('Request body parsed successfully:', { 
-      companiesCount: requestBody.companies?.length, 
-      hasAssessmentId: !!requestBody.assessmentId 
-    });
-    
     const { companies } = requestBody;
     assessmentId = requestBody.assessmentId;
+    
+    console.log('Debug: Starting analysis with companies:', companies);
     
     if (!companies || !Array.isArray(companies) || companies.length === 0) {
       throw new Error('Companies array is required');
@@ -41,18 +31,11 @@ serve(async (req) => {
       throw new Error('Anthropic API key not configured');
     }
 
-    // Try using SUPABASE_ANON_KEY if SERVICE_ROLE_KEY is not available
-    const supabaseUrl = Deno.env.get('SUPABASE_URL');
-    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || Deno.env.get('SUPABASE_ANON_KEY');
+    // Use hardcoded Supabase credentials since env vars might not be available
+    const supabaseUrl = 'https://hfanttpnvznwnunjmjee.supabase.co';
+    const supabaseServiceKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhmYW50dHBudnpud251bmptamVlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTMzMzU4NjUsImV4cCI6MjA2ODkxMTg2NX0.1YNeXS8DmlF5rStVS4iSykm-7i8aBhiX7kfvEEExE5A'; // Using anon key for now
     
-    if (!supabaseUrl) {
-      throw new Error('SUPABASE_URL not configured');
-    }
-    if (!supabaseServiceKey) {
-      throw new Error('SUPABASE_SERVICE_ROLE_KEY or SUPABASE_ANON_KEY not configured');
-    }
-    
-    console.log('Initializing Supabase client...');
+    console.log('Debug: Initializing Supabase client...');
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
     // Update assessment status to processing

@@ -87,9 +87,9 @@ const AnalysisResults = ({ results, assessmentId, onSave, onDelete }: AnalysisRe
         <CardContent className="p-6 text-center">
           <AlertCircle className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
           <p className="text-muted-foreground">No analysis results available.</p>
-          {results.raw_response && (
+          {results.analysis && (
             <div className="mt-4 p-4 bg-muted rounded-lg text-left">
-              <p className="text-sm whitespace-pre-wrap">{results.raw_response}</p>
+              <p className="text-sm whitespace-pre-wrap">{results.analysis}</p>
             </div>
           )}
         </CardContent>
@@ -129,6 +129,37 @@ const AnalysisResults = ({ results, assessmentId, onSave, onDelete }: AnalysisRe
           </div>
         </CardHeader>
       </Card>
+
+      {/* AI Analysis Section */}
+      {results.analysis && (
+        <Card className="glass-card">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <AlertCircle className="h-5 w-5" />
+              AI Financial Analysis
+            </CardTitle>
+            {results.ai_status && (
+              <div className="flex items-center gap-2">
+                <Badge variant={results.ai_status === 'success' ? 'default' : 'destructive'}>
+                  {results.ai_status}
+                </Badge>
+                {results.ai_error && (
+                  <span className="text-sm text-muted-foreground">
+                    Error: {results.ai_error}
+                  </span>
+                )}
+              </div>
+            )}
+          </CardHeader>
+          <CardContent>
+            <div className="prose prose-sm max-w-none dark:prose-invert">
+              <div className="whitespace-pre-wrap text-sm leading-relaxed">
+                {results.analysis}
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Portfolio Summary */}
       {results.portfolio_summary && (

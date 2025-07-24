@@ -60,21 +60,22 @@ serve(async (req) => {
     } else {
       const errorText = await claudeResponse.text();
       console.error('Claude API error:', claudeResponse.status, errorText);
-      claudeText = `Claude API error: ${claudeResponse.status} - ${errorText}`;
+      claudeText = `Claude API Error (${claudeResponse.status}): ${errorText}`;
     }
     
     // Create structured results with Claude analysis
     const results = {
       analysis_date: new Date().toISOString().split('T')[0],
       claude_status: claudeResponse.ok ? 'success' : 'failed',
+      claude_error: claudeResponse.ok ? null : `Status: ${claudeResponse.status}`,
       claude_analysis: claudeText,
       companies: companies.map(company => ({
         name: company,
-        overall_rating: claudeResponse.ok ? 'analyzed' : 'pending', 
-        risk_level: 'medium',
-        key_strengths: ['Market presence', 'Financial stability'],
-        key_weaknesses: ['Market volatility', 'Competition'],
-        recommendations: claudeResponse.ok ? 'See Claude analysis above' : 'Analysis pending - Claude API issue',
+        overall_rating: claudeResponse.ok ? 'analyzed' : 'error', 
+        risk_level: claudeResponse.ok ? 'medium' : 'unknown',
+        key_strengths: claudeResponse.ok ? ['Market presence', 'Financial stability'] : ['Claude API Error'],
+        key_weaknesses: claudeResponse.ok ? ['Market volatility', 'Competition'] : ['Analysis failed'],
+        recommendations: claudeResponse.ok ? 'See Claude analysis above' : claudeText.substring(0, 100) + '...',
         claude_working: claudeResponse.ok
       })),
       debug_info: {

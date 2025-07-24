@@ -8,6 +8,7 @@ import { Progress } from "@/components/ui/progress";
 import { Save, Trash2, Download, TrendingUp, TrendingDown, AlertCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
 interface AnalysisResultsProps {
   results: any;
@@ -225,10 +226,11 @@ const AnalysisResults = ({ results, assessmentId, onSave, onDelete }: AnalysisRe
 
             <CardContent>
               <Tabs defaultValue="ratios" className="w-full">
-                <TabsList className="grid w-full grid-cols-4">
+                <TabsList className="grid w-full grid-cols-5">
                   <TabsTrigger value="ratios">Financial Ratios</TabsTrigger>
                   <TabsTrigger value="timeline">Timeline</TabsTrigger>
                   <TabsTrigger value="risk">Risk Assessment</TabsTrigger>
+                  <TabsTrigger value="zscore">Z-Score</TabsTrigger>
                   <TabsTrigger value="summary">Summary</TabsTrigger>
                 </TabsList>
 
@@ -389,8 +391,159 @@ const AnalysisResults = ({ results, assessmentId, onSave, onDelete }: AnalysisRe
                   )}
                 </TabsContent>
 
+                <TabsContent value="zscore">
+                  {company.altman_z_score?.calculation_details && (
+                    <div className="space-y-6">
+                      {/* Z-Score Overview */}
+                      <div className="text-center p-4 bg-muted/50 rounded-lg">
+                        <h3 className="text-2xl font-bold mb-2">Altman Z-Score: {company.altman_z_score.score?.toFixed(2)}</h3>
+                        <Badge variant={
+                          company.altman_z_score.zone === 'safe' ? 'default' :
+                          company.altman_z_score.zone === 'grey' ? 'secondary' : 'destructive'
+                        } className="text-sm">
+                          {company.altman_z_score.zone?.toUpperCase()} ZONE
+                        </Badge>
+                      </div>
+
+                      {/* Formula Components */}
+                      <div>
+                        <h4 className="font-medium mb-3">Formula Components</h4>
+                        <Table>
+                          <TableHeader>
+                            <TableRow>
+                              <TableHead>Component</TableHead>
+                              <TableHead>Description</TableHead>
+                              <TableHead>Value</TableHead>
+                            </TableRow>
+                          </TableHeader>
+                          <TableBody>
+                            <TableRow>
+                              <TableCell className="font-medium">A</TableCell>
+                              <TableCell>{company.altman_z_score.calculation_details.formula_components.A}</TableCell>
+                              <TableCell>{company.altman_z_score.calculation_details.working_capital_total_assets?.toFixed(3)}</TableCell>
+                            </TableRow>
+                            <TableRow>
+                              <TableCell className="font-medium">B</TableCell>
+                              <TableCell>{company.altman_z_score.calculation_details.formula_components.B}</TableCell>
+                              <TableCell>{company.altman_z_score.calculation_details.retained_earnings_total_assets?.toFixed(3)}</TableCell>
+                            </TableRow>
+                            <TableRow>
+                              <TableCell className="font-medium">C</TableCell>
+                              <TableCell>{company.altman_z_score.calculation_details.formula_components.C}</TableCell>
+                              <TableCell>{company.altman_z_score.calculation_details.ebit_total_assets?.toFixed(3)}</TableCell>
+                            </TableRow>
+                            <TableRow>
+                              <TableCell className="font-medium">D</TableCell>
+                              <TableCell>{company.altman_z_score.calculation_details.formula_components.D}</TableCell>
+                              <TableCell>{company.altman_z_score.calculation_details.market_value_equity_total_debt?.toFixed(3)}</TableCell>
+                            </TableRow>
+                            <TableRow>
+                              <TableCell className="font-medium">E</TableCell>
+                              <TableCell>{company.altman_z_score.calculation_details.formula_components.E}</TableCell>
+                              <TableCell>{company.altman_z_score.calculation_details.sales_total_assets?.toFixed(3)}</TableCell>
+                            </TableRow>
+                          </TableBody>
+                        </Table>
+                      </div>
+
+                      {/* Calculation Steps */}
+                      <div>
+                        <h4 className="font-medium mb-3">Calculation Steps</h4>
+                        <div className="space-y-2">
+                          {company.altman_z_score.calculation_details.calculation_steps?.map((step: string, idx: number) => (
+                            <div key={idx} className="p-3 bg-muted/30 rounded-lg">
+                              <p className="text-sm font-mono">{step}</p>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Assumptions */}
+                      <div>
+                        <h4 className="font-medium mb-3">Key Assumptions & Adjustments</h4>
+                        <ul className="space-y-2">
+                          {company.altman_z_score.calculation_details.assumptions?.map((assumption: string, idx: number) => (
+                            <li key={idx} className="flex items-start gap-2">
+                              <span className="w-2 h-2 bg-primary rounded-full mt-2 flex-shrink-0" />
+                              <span className="text-sm text-muted-foreground">{assumption}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    </div>
+                  )}
+                </TabsContent>
+
                 <TabsContent value="summary">
-                  <div className="space-y-4">
+                  <div className="space-y-6">
+                    {/* Z-Score Trend Chart */}
+                    {company.altman_z_score?.historical_trend && (
+                      <div>
+                        <h4 className="font-medium mb-4">5-Year Z-Score Trend</h4>
+                        <div className="h-64 w-full">
+                          <ResponsiveContainer width="100%" height="100%">
+                            <LineChart data={company.altman_z_score.historical_trend}>
+                              <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
+                              <XAxis 
+                                dataKey="year" 
+                                className="text-xs"
+                              />
+                              <YAxis 
+                                className="text-xs"
+                                domain={['dataMin - 0.5', 'dataMax + 0.5']}
+                              />
+                              <Tooltip 
+                                contentStyle={{
+                                  backgroundColor: 'hsl(var(--card))',
+                                  border: '1px solid hsl(var(--border))',
+                                  borderRadius: '6px'
+                                }}
+                                labelStyle={{ color: 'hsl(var(--foreground))' }}
+                              />
+                              <Line 
+                                type="monotone" 
+                                dataKey="z_score" 
+                                stroke="hsl(var(--primary))" 
+                                strokeWidth={3}
+                                dot={{ fill: 'hsl(var(--primary))', strokeWidth: 2, r: 5 }}
+                                activeDot={{ r: 7, fill: 'hsl(var(--primary))' }}
+                              />
+                              {/* Safe zone reference line */}
+                              <Line 
+                                type="monotone" 
+                                dataKey={() => 2.99} 
+                                stroke="hsl(var(--green-600))" 
+                                strokeDasharray="5 5"
+                                strokeWidth={1}
+                                dot={false}
+                                activeDot={false}
+                              />
+                              {/* Distress zone reference line */}
+                              <Line 
+                                type="monotone" 
+                                dataKey={() => 1.8} 
+                                stroke="hsl(var(--red-600))" 
+                                strokeDasharray="5 5"
+                                strokeWidth={1}
+                                dot={false}
+                                activeDot={false}
+                              />
+                            </LineChart>
+                          </ResponsiveContainer>
+                        </div>
+                        <div className="flex justify-center gap-4 text-xs text-muted-foreground mt-2">
+                          <div className="flex items-center gap-1">
+                            <div className="w-4 h-px bg-green-600"></div>
+                            <span>Safe Zone (&gt;2.99)</span>
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <div className="w-4 h-px bg-red-600"></div>
+                            <span>Distress Zone (&lt;1.8)</span>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
                     {company.key_strengths && (
                       <div>
                         <h4 className="font-medium mb-2 flex items-center gap-2">

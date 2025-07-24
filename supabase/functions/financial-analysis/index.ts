@@ -57,7 +57,42 @@ serve(async (req) => {
       "risk_level": "low|medium|high",
       "altman_z_score": {
         "score": 2.5,
-        "zone": "safe|grey|distress"
+        "zone": "safe|grey|distress",
+        "calculation_details": {
+          "working_capital_total_assets": 0.2,
+          "retained_earnings_total_assets": 0.15,
+          "ebit_total_assets": 0.12,
+          "market_value_equity_total_debt": 0.8,
+          "sales_total_assets": 1.1,
+          "formula_components": {
+            "A": "Working Capital / Total Assets",
+            "B": "Retained Earnings / Total Assets", 
+            "C": "EBIT / Total Assets",
+            "D": "Market Value of Equity / Total Debt",
+            "E": "Sales / Total Assets"
+          },
+          "calculation_steps": [
+            "Step 1: Calculate Working Capital / Total Assets = 0.2",
+            "Step 2: Calculate Retained Earnings / Total Assets = 0.15",
+            "Step 3: Calculate EBIT / Total Assets = 0.12",
+            "Step 4: Calculate Market Value of Equity / Total Debt = 0.8",
+            "Step 5: Calculate Sales / Total Assets = 1.1",
+            "Step 6: Apply formula: Z = 1.2A + 1.4B + 3.3C + 0.6D + 1.0E"
+          ],
+          "assumptions": [
+            "Market value of equity based on current market capitalization",
+            "Working capital calculated as current assets minus current liabilities",
+            "EBIT represents earnings before interest and taxes",
+            "Total debt includes both short-term and long-term debt"
+          ]
+        },
+        "historical_trend": [
+          {"year": 2020, "z_score": 2.1},
+          {"year": 2021, "z_score": 2.3},
+          {"year": 2022, "z_score": 2.2},
+          {"year": 2023, "z_score": 2.4},
+          {"year": 2024, "z_score": 2.5}
+        ]
       },
       "liquidity_ratios": {
         "current_ratio": 1.5,

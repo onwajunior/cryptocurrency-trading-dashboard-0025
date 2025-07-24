@@ -47,7 +47,16 @@ serve(async (req) => {
           },
           {
             role: 'user',
-            content: `Analyze these companies: ${companies.join(', ')}. Return ONLY a JSON object with this exact structure:
+            content: `Analyze these companies: ${companies.join(', ')}. For each company, determine the appropriate Altman Z-score formula based on company type:
+
+ALTMAN Z-SCORE FORMULAS BY COMPANY TYPE:
+1. Public Manufacturing Companies: Z = 1.2X₁ + 1.4X₂ + 3.3X₃ + 0.6X₄ + 1.0X₅ (Safe if > 2.99, Grey zone 1.8-2.99, Distress < 1.8)
+2. Private Companies: Z = 0.717X₁ + 0.847X₂ + 3.107X₃ + 0.420X₄ + 0.998X₅ (Safe if > 2.6, Grey zone 1.1-2.6, Distress < 1.1)
+3. Public Non-Manufacturing (Service/Tech): Z = 6.56X₁ + 3.26X₂ + 6.72X₃ + 1.05X₄ (Safe if > 2.6, Grey zone 1.1-2.6, Distress < 1.1)
+
+Where: X₁ = Working Capital/Total Assets, X₂ = Retained Earnings/Total Assets, X₃ = EBIT/Total Assets, X₄ = Market Value Equity/Total Debt, X₅ = Sales/Total Assets
+
+Return ONLY a JSON object with this exact structure:
 
 {
   "companies": [
@@ -55,9 +64,12 @@ serve(async (req) => {
       "name": "Company Name",
       "overall_rating": "excellent|good|fair|poor|critical",
       "risk_level": "low|medium|high",
+      "company_type": "public_manufacturing|private|public_non_manufacturing",
       "altman_z_score": {
         "score": 2.5,
         "zone": "safe|grey|distress",
+        "formula_used": "public_manufacturing|private|public_non_manufacturing",
+        "safe_threshold": 2.99,
         "calculation_details": {
           "working_capital_total_assets": 0.2,
           "retained_earnings_total_assets": 0.15,
@@ -65,25 +77,36 @@ serve(async (req) => {
           "market_value_equity_total_debt": 0.8,
           "sales_total_assets": 1.1,
           "formula_components": {
-            "A": "Working Capital / Total Assets",
-            "B": "Retained Earnings / Total Assets", 
-            "C": "EBIT / Total Assets",
-            "D": "Market Value of Equity / Total Debt",
-            "E": "Sales / Total Assets"
+            "X1": "Working Capital / Total Assets",
+            "X2": "Retained Earnings / Total Assets", 
+            "X3": "EBIT / Total Assets",
+            "X4": "Market Value of Equity / Total Debt",
+            "X5": "Sales / Total Assets (only for manufacturing and private companies)"
+          },
+          "formula_coefficients": {
+            "X1_coefficient": 1.2,
+            "X2_coefficient": 1.4,
+            "X3_coefficient": 3.3,
+            "X4_coefficient": 0.6,
+            "X5_coefficient": 1.0
           },
           "calculation_steps": [
-            "Step 1: Calculate Working Capital / Total Assets = 0.2",
-            "Step 2: Calculate Retained Earnings / Total Assets = 0.15",
-            "Step 3: Calculate EBIT / Total Assets = 0.12",
-            "Step 4: Calculate Market Value of Equity / Total Debt = 0.8",
-            "Step 5: Calculate Sales / Total Assets = 1.1",
-            "Step 6: Apply formula: Z = 1.2A + 1.4B + 3.3C + 0.6D + 1.0E"
+            "Step 1: Identify company type: Public Manufacturing",
+            "Step 2: Calculate X₁ (Working Capital / Total Assets) = 0.2",
+            "Step 3: Calculate X₂ (Retained Earnings / Total Assets) = 0.15",
+            "Step 4: Calculate X₃ (EBIT / Total Assets) = 0.12",
+            "Step 5: Calculate X₄ (Market Value of Equity / Total Debt) = 0.8",
+            "Step 6: Calculate X₅ (Sales / Total Assets) = 1.1",
+            "Step 7: Apply formula: Z = 1.2(0.2) + 1.4(0.15) + 3.3(0.12) + 0.6(0.8) + 1.0(1.1) = 2.5",
+            "Step 8: Compare to threshold: 2.5 < 2.99 = Grey Zone"
           ],
           "assumptions": [
+            "Company classified as public manufacturing based on business model and listing status",
             "Market value of equity based on current market capitalization",
             "Working capital calculated as current assets minus current liabilities",
             "EBIT represents earnings before interest and taxes",
-            "Total debt includes both short-term and long-term debt"
+            "Total debt includes both short-term and long-term debt",
+            "Formula selection based on company type and industry classification"
           ]
         },
         "historical_trend": [

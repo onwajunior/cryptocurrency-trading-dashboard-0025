@@ -14,81 +14,35 @@ serve(async (req) => {
   try {
     const { companies, assessmentId } = await req.json();
     
-    console.log('Received request with companies:', companies);
-    console.log('Assessment ID:', assessmentId);
+    console.log('Basic function test - companies:', companies);
     
-    if (!companies || !Array.isArray(companies) || companies.length === 0) {
-      throw new Error('Companies array is required');
-    }
-
-    const anthropicApiKey = Deno.env.get('ANTHROPIC_API_KEY');
-    console.log('Anthropic API key available:', !!anthropicApiKey);
+    // Check environment variables
+    const anthropicKey = Deno.env.get('ANTHROPIC_API_KEY');
+    console.log('API key exists:', !!anthropicKey);
+    console.log('API key length:', anthropicKey?.length || 0);
     
-    if (!anthropicApiKey) {
-      throw new Error('Anthropic API key not configured');
-    }
-
-    console.log('Testing simple Claude API call...');
-
-    // Very simple test call to Claude
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${anthropicApiKey}`,
-        'Content-Type': 'application/json',
-        'anthropic-version': '2023-06-01',
-      },
-      body: JSON.stringify({
-        model: 'claude-3-5-sonnet-20241022',
-        max_tokens: 100,
-        messages: [
-          {
-            role: 'user',
-            content: 'Say hello'
-          }
-        ],
-      }),
-    });
-
-    console.log('Claude API response status:', response.status);
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error('Claude API error:', errorText);
-      throw new Error(`Claude API error: ${response.status} - ${errorText}`);
-    }
-
-    const data = await response.json();
-    console.log('Claude API call successful');
-
-    // Return simple results for now
-    const analysisResults = {
-      analysis_date: new Date().toISOString().split('T')[0],
-      companies: companies.map(company => ({
-        name: company,
-        overall_rating: 'good',
-        risk_level: 'medium',
-        key_strengths: ['Market presence', 'Financial stability'],
-        key_weaknesses: ['Market volatility', 'Competition'],
-        recommendations: 'Continue monitoring financial metrics',
-        claude_test: data.content[0].text
-      }))
+    // Simple response without any external API calls
+    const results = {
+      status: 'success',
+      message: 'Function is working',
+      companies: companies,
+      anthropic_key_available: !!anthropicKey,
+      timestamp: new Date().toISOString()
     };
-
-    console.log('Analysis completed successfully');
 
     return new Response(JSON.stringify({ 
       success: true, 
-      results: analysisResults 
+      results: results 
     }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
 
   } catch (error) {
-    console.error('Error in financial analysis:', error);
+    console.error('Error:', error);
     
     return new Response(JSON.stringify({ 
-      error: error.message 
+      error: error.message,
+      stack: error.stack
     }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },

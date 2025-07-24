@@ -16,7 +16,19 @@ serve(async (req) => {
   let assessmentId = null;
   
   try {
+    // Debug: Check what environment variables are available
+    console.log('Environment variables check:');
+    console.log('ANTHROPIC_API_KEY exists:', !!Deno.env.get('ANTHROPIC_API_KEY'));
+    console.log('SUPABASE_URL exists:', !!Deno.env.get('SUPABASE_URL'));
+    console.log('SUPABASE_SERVICE_ROLE_KEY exists:', !!Deno.env.get('SUPABASE_SERVICE_ROLE_KEY'));
+    console.log('SUPABASE_ANON_KEY exists:', !!Deno.env.get('SUPABASE_ANON_KEY'));
+    
     const requestBody = await req.json();
+    console.log('Request body parsed successfully:', { 
+      companiesCount: requestBody.companies?.length, 
+      hasAssessmentId: !!requestBody.assessmentId 
+    });
+    
     const { companies } = requestBody;
     assessmentId = requestBody.assessmentId;
     
@@ -29,9 +41,18 @@ serve(async (req) => {
       throw new Error('Anthropic API key not configured');
     }
 
-    // Initialize Supabase client
-    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
-    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+    // Try using SUPABASE_ANON_KEY if SERVICE_ROLE_KEY is not available
+    const supabaseUrl = Deno.env.get('SUPABASE_URL');
+    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || Deno.env.get('SUPABASE_ANON_KEY');
+    
+    if (!supabaseUrl) {
+      throw new Error('SUPABASE_URL not configured');
+    }
+    if (!supabaseServiceKey) {
+      throw new Error('SUPABASE_SERVICE_ROLE_KEY or SUPABASE_ANON_KEY not configured');
+    }
+    
+    console.log('Initializing Supabase client...');
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
     // Update assessment status to processing

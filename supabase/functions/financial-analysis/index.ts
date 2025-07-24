@@ -49,6 +49,13 @@ serve(async (req) => {
             role: 'user',
             content: `Analyze these companies: ${companies.join(', ')}. For each company, determine the appropriate Altman Z-score formula based on company type:
 
+CRITICAL INSTRUCTIONS FOR CONSISTENT RESULTS:
+- Base ALL calculations SOLELY on the most recent full-year (annual) financial statements available
+- DO NOT use partial-year data (quarterly, interim, or YTD figures)
+- DO NOT annualize partial-year data under any circumstances
+- Use only complete 12-month annual reporting periods
+- This ensures consistent results across multiple analysis runs
+
 ALTMAN Z-SCORE FORMULAS BY COMPANY TYPE:
 1. Public Manufacturing Companies: Z = 1.2X₁ + 1.4X₂ + 3.3X₃ + 0.6X₄ + 1.0X₅ (Safe if > 2.99, Grey zone 1.8-2.99, Distress < 1.8)
 2. Private Companies: Z = 0.717X₁ + 0.847X₂ + 3.107X₃ + 0.420X₄ + 0.998X₅ (Safe if > 2.6, Grey zone 1.1-2.6, Distress < 1.1)

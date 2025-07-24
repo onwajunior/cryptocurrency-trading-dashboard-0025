@@ -39,12 +39,20 @@ serve(async (req) => {
         'anthropic-version': '2023-06-01',
       },
       body: JSON.stringify({
-        model: 'claude-3-5-sonnet-20241022',
-        max_tokens: 1000,
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 2000,
         messages: [
           {
             role: 'user',
-            content: `Provide a brief financial risk analysis for: ${companies.join(', ')}. Rate each as low/medium/high risk with 2-3 key points.`
+            content: `Provide a comprehensive financial risk analysis for these companies: ${companies.join(', ')}. 
+
+For each company, please provide:
+1. Overall risk rating (Low/Medium/High)
+2. Key financial strengths (2-3 points)
+3. Key risks and weaknesses (2-3 points)
+4. Investment recommendations
+
+Format your response clearly for each company.`
           }
         ],
       }),

@@ -446,13 +446,25 @@ const Dashboard = () => {
                   onSave={handleSaveResults}
                   onDelete={handleDeleteResults}
                   onViewDetails={(companyName) => {
-                    // Switch to detailed mode and analyze single company
-                    setAnalysisMode('detailed');
-                    setCompanies(companyName);
-                    setCurrentStep('analyzing');
+                    // Find the company data from existing batch results
+                    const companyData = analysisResults?.companies?.find(
+                      (company: any) => company.name.toLowerCase() === companyName.toLowerCase()
+                    );
                     
-                    // Trigger detailed analysis for the specific company
-                    handleConfirmCompanies([companyName]);
+                    if (companyData) {
+                      // Use existing data to show detailed view
+                      setAnalysisResults({
+                        ...analysisResults,
+                        companies: [companyData]
+                      });
+                      setCurrentStep('results');
+                    } else {
+                      // Fallback: trigger new detailed analysis if company not found
+                      setAnalysisMode('detailed');
+                      setCompanies(companyName);
+                      setCurrentStep('analyzing');
+                      handleConfirmCompanies([companyName]);
+                    }
                   }}
                 />
               )}

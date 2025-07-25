@@ -230,14 +230,14 @@ const AnalysisResults = ({
                 <h4 className="font-medium mb-4">5-Year Z-Score Trend</h4>
                 <div className="h-64">
                   <ResponsiveContainer width="100%" height="100%">
-                    <LineChart data={results.portfolio_summary.zscore_trend.map((item: any) => ({
-                      year: item.year,
-                      zscore: item.zscore
-                    }))}>
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis dataKey="year" />
-                      <YAxis domain={[0, 'dataMax + 1']} />
-                      <Tooltip formatter={(value: number) => [value?.toFixed(2), 'Z-Score']} labelFormatter={label => `Year: ${label}`} />
+                     <LineChart data={results.portfolio_summary.zscore_trend.slice(-5).map((item: any, index: number) => ({
+                       year: 2024 - (4 - index), // Align with table years: 2020, 2021, 2022, 2023, 2024
+                       zscore: item.zscore
+                     }))}>
+                       <CartesianGrid strokeDasharray="3 3" />
+                       <XAxis dataKey="year" />
+                       <YAxis domain={[0, 'dataMax + 1']} />
+                       <Tooltip formatter={(value: number) => [value?.toFixed(2), 'Z-Score']} labelFormatter={label => `Year: ${label}`} />
                       <Line type="monotone" dataKey="zscore" stroke="hsl(var(--primary))" strokeWidth={3} dot={{
                   fill: "hsl(var(--primary))",
                   strokeWidth: 2,

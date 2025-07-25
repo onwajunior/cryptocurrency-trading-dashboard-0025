@@ -570,11 +570,14 @@ const AnalysisResults = ({ results, assessmentId, assessmentName, onSave, onDele
                         {company.altman_z_score?.historical_trend && (
                           <TableRow>
                             <TableCell className="font-medium">Altman Z-Score</TableCell>
-                            {company.altman_z_score.historical_trend.slice(-5).map((trendData: any) => (
-                              <TableCell key={trendData.year} className="text-center">
-                                {trendData.z_score?.toFixed(2) || '-'}
-                              </TableCell>
-                            ))}
+                            {company.financial_timeline.slice(0, 5).map((yearData: any) => {
+                              const matchingZScore = company.altman_z_score.historical_trend.find((trend: any) => trend.year === yearData.year);
+                              return (
+                                <TableCell key={yearData.year} className="text-center">
+                                  {matchingZScore?.z_score?.toFixed(2) || '-'}
+                                </TableCell>
+                              );
+                            })}
                             <TableCell className="text-center">2.60</TableCell>
                             <TableCell className="text-center">
                               <Badge className={`${

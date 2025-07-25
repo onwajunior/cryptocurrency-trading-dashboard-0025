@@ -134,6 +134,25 @@ const AnalysisResults = ({
         return 'text-muted-foreground';
     }
   };
+
+  const calculateAssessment = (currentValue: number, industryAvg: number, isHigherBetter: boolean = true) => {
+    const ratio = currentValue / industryAvg;
+    
+    if (isHigherBetter) {
+      if (ratio >= 1.5) return { label: "Excellent", className: "bg-green-100 text-green-800 hover:bg-green-200" };
+      if (ratio >= 1.2) return { label: "Strong", className: "bg-green-100 text-green-800 hover:bg-green-200" };
+      if (ratio >= 1.0) return { label: "Above Average", className: "bg-green-100 text-green-800 hover:bg-green-200" };
+      if (ratio >= 0.8) return { label: "Below Average", className: "bg-yellow-100 text-yellow-800 hover:bg-yellow-200" };
+      return { label: "Weak", className: "bg-red-100 text-red-800 hover:bg-red-200" };
+    } else {
+      // For ratios where lower is better (like debt/equity)
+      if (ratio <= 0.7) return { label: "Excellent", className: "bg-green-100 text-green-800 hover:bg-green-200" };
+      if (ratio <= 0.9) return { label: "Good", className: "bg-green-100 text-green-800 hover:bg-green-200" };
+      if (ratio <= 1.0) return { label: "Average", className: "bg-blue-100 text-blue-800 hover:bg-blue-200" };
+      if (ratio <= 1.3) return { label: "Elevated", className: "bg-yellow-100 text-yellow-800 hover:bg-yellow-200" };
+      return { label: "High Risk", className: "bg-red-100 text-red-800 hover:bg-red-200" };
+    }
+  };
   if (!results.companies) {
     return <Card className="glass-card">
         <CardContent className="p-6 text-center">
@@ -462,7 +481,11 @@ const AnalysisResults = ({
                             ))}
                             <TableCell className="text-center">12.5</TableCell>
                             <TableCell className="text-center">
-                              <Badge className="bg-red-100 text-red-800 hover:bg-red-200">Below Average</Badge>
+                              {(() => {
+                                const currentROE = dataByYear[years[0]]?.roe ? dataByYear[years[0]].roe * 100 : 0;
+                                const assessment = calculateAssessment(currentROE, 12.5, true);
+                                return <Badge className={assessment.className}>{assessment.label}</Badge>;
+                              })()}
                             </TableCell>
                           </TableRow>
                           <TableRow>
@@ -474,7 +497,11 @@ const AnalysisResults = ({
                             ))}
                             <TableCell className="text-center">5.20</TableCell>
                             <TableCell className="text-center">
-                              <Badge className="bg-red-100 text-red-800 hover:bg-red-200">Weak</Badge>
+                              {(() => {
+                                const currentROA = dataByYear[years[0]]?.roa ? dataByYear[years[0]].roa * 100 : 0;
+                                const assessment = calculateAssessment(currentROA, 5.20, true);
+                                return <Badge className={assessment.className}>{assessment.label}</Badge>;
+                              })()}
                             </TableCell>
                           </TableRow>
                           <TableRow>

@@ -21,27 +21,30 @@ serve(async (req) => {
     }
     
     // Check environment variables
-    const anthropicKey = Deno.env.get('ANTHROPIC_API_KEY');
-    console.log('Anthropic API key exists:', !!anthropicKey);
+    const openaiKey = Deno.env.get('OPENAI_API_KEY');
+    console.log('OpenAI API key exists:', !!openaiKey);
     
-    if (!anthropicKey) {
-      throw new Error('Anthropic API key not configured');
+    if (!openaiKey) {
+      throw new Error('OpenAI API key not configured');
     }
 
-    // Now try Anthropic API call
-    console.log('Calling Anthropic API...');
+    // Now try OpenAI API call
+    console.log('Calling OpenAI API...');
     
-    const anthropicResponse = await fetch('https://api.anthropic.com/v1/messages', {
+    const openaiResponse = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
-        'x-api-key': anthropicKey,
-        'Content-Type': 'application/json',
-        'anthropic-version': '2023-06-01'
+        'Authorization': `Bearer ${openaiKey}`,
+        'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        model: 'claude-3-5-sonnet-20241022',
+        model: 'gpt-4.1-2025-04-14',
         max_tokens: 4000,
         messages: [
+          {
+            role: 'system',
+            content: 'You are a financial analyst. You must return ONLY valid JSON in the exact format specified. Do not include any text before or after the JSON.'
+          },
           {
             role: 'user',
             content: `You are a financial analyst. You must return ONLY valid JSON in the exact format specified. Do not include any text before or after the JSON.
@@ -192,15 +195,15 @@ Use realistic financial data and ratios for each company. Include 5-10 years of 
       }),
     });
 
-    console.log('Anthropic response status:', anthropicResponse.status);
+    console.log('OpenAI response status:', openaiResponse.status);
 
     let structuredResults = null;
     let analysisText = '';
     
-    if (anthropicResponse.ok) {
-      const anthropicData = await anthropicResponse.json();
-      analysisText = anthropicData.content[0].text;
-      console.log('Anthropic response received successfully');
+    if (openaiResponse.ok) {
+      const openaiData = await openaiResponse.json();
+      analysisText = openaiData.choices[0].message.content;
+      console.log('OpenAI response received successfully');
       
       // Try to parse the JSON response
       try {
@@ -212,30 +215,30 @@ Use realistic financial data and ratios for each company. Include 5-10 years of 
         structuredResults = null;
       }
     } else {
-      const errorText = await anthropicResponse.text();
-      console.error('Anthropic API error:', anthropicResponse.status, errorText);
-      analysisText = `Anthropic API Error (${anthropicResponse.status}): ${errorText}`;
+      const errorText = await openaiResponse.text();
+      console.error('OpenAI API error:', openaiResponse.status, errorText);
+      analysisText = `OpenAI API Error (${openaiResponse.status}): ${errorText}`;
     }
     
     // Create results object - use structured data if available, fallback otherwise
     const results = {
       analysis_date: new Date().toISOString().split('T')[0],
-      ai_status: anthropicResponse.ok ? 'success' : 'failed',
-      ai_error: anthropicResponse.ok ? null : `Status: ${anthropicResponse.status}`,
+      ai_status: openaiResponse.ok ? 'success' : 'failed',
+      ai_error: openaiResponse.ok ? null : `Status: ${openaiResponse.status}`,
       analysis: !structuredResults ? analysisText : 'Structured analysis completed successfully',
       companies: structuredResults?.companies || companies.map(company => ({
         name: company,
-        overall_rating: anthropicResponse.ok ? 'analyzed' : 'error', 
-        risk_level: anthropicResponse.ok ? 'medium' : 'unknown',
-        key_strengths: anthropicResponse.ok ? ['Market presence', 'Financial stability'] : ['Anthropic API Error'],
-        key_weaknesses: anthropicResponse.ok ? ['Market volatility', 'Competition'] : ['Analysis failed'],
-        recommendations: anthropicResponse.ok ? 'See analysis above' : analysisText.substring(0, 100) + '...',
-        ai_working: anthropicResponse.ok
+        overall_rating: openaiResponse.ok ? 'analyzed' : 'error', 
+        risk_level: openaiResponse.ok ? 'medium' : 'unknown',
+        key_strengths: openaiResponse.ok ? ['Market presence', 'Financial stability'] : ['OpenAI API Error'],
+        key_weaknesses: openaiResponse.ok ? ['Market volatility', 'Competition'] : ['Analysis failed'],
+        recommendations: openaiResponse.ok ? 'See analysis above' : analysisText.substring(0, 100) + '...',
+        ai_working: openaiResponse.ok
       })),
       portfolio_summary: structuredResults?.portfolio_summary || null,
       debug_info: {
-        ai_response_status: anthropicResponse.status,
-        api_key_length: anthropicKey?.length || 0,
+        ai_response_status: openaiResponse.status,
+        api_key_length: openaiKey?.length || 0,
         timestamp: new Date().toISOString(),
         structured_data_parsed: !!structuredResults
       }

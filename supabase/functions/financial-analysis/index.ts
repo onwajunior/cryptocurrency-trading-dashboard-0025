@@ -53,11 +53,23 @@ serve(async (req) => {
             content: isQuickMode ? 
               `You are a financial analyst performing QUICK ANALYSIS. You must return ONLY valid JSON in the exact format specified. Do not include any text before or after the JSON.
 
+CRITICAL CONSISTENCY REQUIREMENT:
+- Use ACTUAL financial data from each company's most recent 10-K filing
+- NEVER generate random or estimated values
+- Ensure consistent results by using factual data from verified sources
+- Use the same fiscal year data for consistency across repeated analysis
+
 QUICK ANALYSIS MODE - ESSENTIAL METRICS ONLY:
 - Focus on core financial health indicators only
-- Provide concise, essential data without extensive calculations
-- Limit response to key ratios and Z-score
+- Use actual current ratio, debt-to-equity, and ROE from latest 10-K
+- Calculate accurate Altman Z-score based on real financial data
 - No detailed timelines or extensive explanations
+
+MANDATORY DATA SOURCE REQUIREMENTS:
+- ONLY USE the most recently filed 10-K annual report for each company
+- Extract actual financial ratios from the official filing
+- Use consistent fiscal year data (typically the most recent completed year)
+- NEVER use estimated, projected, or randomly generated values
 
 Analyze these companies: ${companies.join(', ')}. For each company, provide ONLY essential metrics:
 
@@ -87,7 +99,7 @@ Return ONLY a JSON object with this SIMPLIFIED structure:
   }
 }
 
-Use realistic financial data. Keep responses concise. Return ONLY the JSON, no other text.` 
+CRITICAL: Use ONLY actual financial data from official filings. Ensure consistency by using the same data source and fiscal year for repeated analysis. Return ONLY the JSON, no other text.`
               : 
               `You are a financial analyst. You must return ONLY valid JSON in the exact format specified. Do not include any text before or after the JSON.
 

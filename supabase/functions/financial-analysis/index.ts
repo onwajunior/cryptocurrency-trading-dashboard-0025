@@ -63,6 +63,11 @@ VERIFICATION STEPS YOU MUST FOLLOW:
 5. Calculate all ratios using these verified annual figures
 
 Analyze these companies: ${companies.join(', ')}. For each company, determine the appropriate Altman Z-score formula based on company type:
+CALCULATION BREAKDOWN REQUIREMENTS:
+- For "calculation_steps", show EVERY component calculation with actual financial statement numbers
+- Example: Show "Current Assets: $45,000M, Current Liabilities: $35,000M, Working Capital = $45,000M - $35,000M = $10,000M"
+- Break down each ratio calculation showing the numerator, denominator, and actual dollar amounts from financial statements
+- Show the step-by-step arithmetic for the final Z-score calculation with all intermediate values
 
 ALTMAN Z-SCORE FORMULAS BY COMPANY TYPE:
 1. Public Manufacturing Companies: Z = 1.2X₁ + 1.4X₂ + 3.3X₃ + 0.6X₄ + 1.0X₅ (Safe if > 2.99, Grey zone 1.8-2.99, Distress < 1.8)

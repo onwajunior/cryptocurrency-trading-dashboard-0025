@@ -51,9 +51,9 @@ serve(async (req) => {
 
 MANDATORY DATA SOURCE REQUIREMENTS - READ THIS CAREFULLY:
 **ONLY USE FULL-YEAR ANNUAL FINANCIAL STATEMENTS - NO EXCEPTIONS**
-- Use the company's most recently available COMPLETE fiscal year data (typically their latest 10-K filing)
-- For most public companies in 2025: Use fiscal year 2024 data (ended December 31, 2024 or company's fiscal year end)
-- ENSURE YEAR ALIGNMENT: If using 2024 data, report it as 2024. If using 2023 data, report it as 2023.
+- Dynamically determine the company's most recently available COMPLETE fiscal year data from their latest 10-K filing
+- NEVER assume specific years like 2024, 2023, etc. - determine the actual latest completed fiscal year
+- ENSURE YEAR ALIGNMENT: The year reported MUST match the actual fiscal year of the data being used
 - NEVER use quarterly reports (Q1, Q2, Q3, Q4), interim reports, or trailing twelve months (TTM)
 - NEVER annualize or estimate data from partial periods
 - NEVER use current year partial data or projections
@@ -62,18 +62,20 @@ MANDATORY DATA SOURCE REQUIREMENTS - READ THIS CAREFULLY:
 CRITICAL: Use actual calculated financial ratios only. Do not override or substitute them with scenario data, default values, or rounded assumptions. Use the direct result, even if negative or small. Explicitly prohibit the use of preconfigured scenarios, default ratios, or demo values. Every value must trace to a verifiable number from the financials.
 
 CRITICAL YEAR REPORTING REQUIREMENT:
+- DYNAMICALLY determine each company's most recent completed fiscal year (do not assume any specific year)
 - The year reported in your response MUST match the actual fiscal year of the data being used
-- If you extract 2023 fiscal year data, ALL references should be to 2023, not 2024
 - The "financial_timeline" array must show the CORRECT fiscal years for each data point
-- The "historical_trend" array must use ACTUAL fiscal years, not assumed years
+- The "historical_trend" array must use ACTUAL fiscal years based on the company's filing history
+- Work backwards chronologically from the most recent complete year
 
 VERIFICATION STEPS YOU MUST FOLLOW:
-1. Identify the company's most recent completed fiscal year (usually December 31)
-2. Locate their official 10-K or annual report for that completed year
-3. Extract financial data ONLY from that single annual report
-4. Ensure the fiscal year reported matches the data extracted (e.g., if 2023 10-K data, report as 2023)
-5. Calculate all ratios using these verified annual figures
-6. For historical data, use actual fiscal years from previous 10-K filings
+1. Determine the current calendar year and month
+2. Identify each company's fiscal year calendar (most end December 31, but some have different year-ends)
+3. Determine the most recent COMPLETED fiscal year for each company
+4. Locate their official 10-K or annual report for that completed year
+5. Extract financial data ONLY from that single annual report
+6. Ensure all years reported match the actual fiscal years of the data extracted
+7. For historical data, use actual fiscal years from previous 10-K filings in chronological order
 
 Analyze these companies: ${companies.join(', ')}. For each company, determine the appropriate Altman Z-score formula based on company type:
 CALCULATION BREAKDOWN REQUIREMENTS:
@@ -143,11 +145,11 @@ Return ONLY a JSON object with this exact structure:
           ]
         },
         "historical_trend": [
-          {"year": 2020, "z_score": 2.1},
-          {"year": 2021, "z_score": 2.3},
-          {"year": 2022, "z_score": 2.2},
-          {"year": 2023, "z_score": 2.4},
-          {"year": 2024, "z_score": 2.5}
+          {"year": "YEAR-4", "z_score": 2.1},
+          {"year": "YEAR-3", "z_score": 2.3},
+          {"year": "YEAR-2", "z_score": 2.2},
+          {"year": "YEAR-1", "z_score": 2.4},
+          {"year": "CURRENT_YEAR", "z_score": 2.5}
         ]
       },
       "liquidity_ratios": {
@@ -166,7 +168,7 @@ Return ONLY a JSON object with this exact structure:
       },
       "financial_timeline": [
         {
-          "year": 2023,
+          "year": "CURRENT_YEAR",
           "revenue": 400000000000,
           "net_income": 50000000000,
           "total_debt": 100000000000,
@@ -180,7 +182,7 @@ Return ONLY a JSON object with this exact structure:
           "key_events": "Major product launch"
         },
         {
-          "year": 2022,
+          "year": "YEAR-1",
           "revenue": 380000000000,
           "net_income": 48000000000,
           "total_debt": 95000000000,
@@ -194,7 +196,7 @@ Return ONLY a JSON object with this exact structure:
           "key_events": "Market expansion"
         },
         {
-          "year": 2021,
+          "year": "YEAR-2",
           "revenue": 365000000000,
           "net_income": 45000000000,
           "total_debt": 90000000000,
@@ -208,7 +210,7 @@ Return ONLY a JSON object with this exact structure:
           "key_events": "Digital transformation"
         },
         {
-          "year": 2020,
+          "year": "YEAR-3",
           "revenue": 350000000000,
           "net_income": 42000000000,
           "total_debt": 85000000000,
@@ -222,7 +224,7 @@ Return ONLY a JSON object with this exact structure:
           "key_events": "Pandemic response"
         },
         {
-          "year": 2019,
+          "year": "YEAR-4",
           "revenue": 335000000000,
           "net_income": 40000000000,
           "total_debt": 80000000000,
@@ -253,16 +255,16 @@ Return ONLY a JSON object with this exact structure:
     "diversification_analysis": "Analysis of portfolio diversification",
     "overall_recommendations": "Portfolio recommendations",
     "zscore_trend": [
-      {"year": 2020, "zscore": 2.1},
-      {"year": 2021, "zscore": 2.3},
-      {"year": 2022, "zscore": 2.2},
-      {"year": 2023, "zscore": 2.4},
-      {"year": 2024, "zscore": 2.5}
+      {"year": "YEAR-4", "zscore": 2.1},
+      {"year": "YEAR-3", "zscore": 2.3},
+      {"year": "YEAR-2", "zscore": 2.2},
+      {"year": "YEAR-1", "zscore": 2.4},
+      {"year": "CURRENT_YEAR", "zscore": 2.5}
     ]
   }
 }
 
-Use realistic financial data and ratios for each company. Include 5 years of timeline data with COMPLETE financial ratios for EACH year (current_ratio, quick_ratio, debt_to_equity, roe, roa, net_margin, times_interest_earned). ENSURE ALL YEARS ALIGN CORRECTLY - if extracting 2023 data, report it as 2023, not 2024. Calculate proper Altman Z-scores (>2.99=safe, 1.8-2.99=grey, <1.8=distress). Return ONLY the JSON, no other text.`
+Use realistic financial data and ratios for each company. Include 5 years of timeline data with COMPLETE financial ratios for EACH year (current_ratio, quick_ratio, debt_to_equity, roe, roa, net_margin, times_interest_earned). CRITICAL: Replace all placeholder years (CURRENT_YEAR, YEAR-1, etc.) with the ACTUAL fiscal years from the company's filings. Ensure chronological order from oldest to newest. Calculate proper Altman Z-scores (>2.99=safe, 1.8-2.99=grey, <1.8=distress). Return ONLY the JSON, no other text.`
           }
         ],
       }),

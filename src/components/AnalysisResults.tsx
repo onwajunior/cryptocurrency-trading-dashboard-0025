@@ -230,17 +230,17 @@ const AnalysisResults = ({
                 <h4 className="font-medium mb-4">5-Year Z-Score Trend</h4>
                 <div className="h-64">
                   <ResponsiveContainer width="100%" height="100%">
-                     <LineChart data={results.portfolio_summary.zscore_trend.slice(-5).map((item: any, index: number) => ({
-                       year: 2024 - (4 - index), // Align with table years: 2020, 2021, 2022, 2023, 2024
-                       zscore: item.zscore
-                     }))}>
-                       <CartesianGrid strokeDasharray="3 3" />
-                       <XAxis dataKey="year" />
-                       <YAxis domain={[0, 'dataMax + 1']} />
-                       <Tooltip formatter={(value: number) => [value?.toFixed(2), 'Z-Score']} labelFormatter={label => `Year: ${label}`} />
+                    <LineChart data={results.portfolio_summary.zscore_trend.map((item: any) => ({
+                      year: item.year,
+                      zscore: item.zscore
+                    }))}>
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis dataKey="year" />
+                      <YAxis domain={[0, 'dataMax + 1']} />
+                      <Tooltip formatter={(value: number) => [value?.toFixed(2), 'Z-Score']} labelFormatter={label => `Year: ${label}`} />
                       <Line type="monotone" dataKey="zscore" stroke="hsl(var(--primary))" strokeWidth={3} dot={{
-                  fill: "hsl(var(--primary))",
-                  strokeWidth: 2,
+                        fill: "hsl(var(--primary))",
+                        strokeWidth: 2,
                   r: 6
                 }} activeDot={{
                   r: 8,
@@ -384,108 +384,129 @@ const AnalysisResults = ({
               </CardHeader>
               <CardContent>
                 <div className="overflow-x-auto">
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead className="font-semibold text-primary">Metric</TableHead>
-                        <TableHead className="text-center font-semibold">2024</TableHead>
-                        <TableHead className="text-center font-semibold">2023</TableHead>
-                        <TableHead className="text-center font-semibold">2022</TableHead>
-                        <TableHead className="text-center font-semibold">2021</TableHead>
-                        <TableHead className="text-center font-semibold">2020</TableHead>
-                        <TableHead className="text-center font-semibold">Industry Avg</TableHead>
-                        <TableHead className="text-center font-semibold">Assessment</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      <TableRow>
-                        <TableCell className="font-medium">Current Ratio</TableCell>
-                        <TableCell className="text-center">{company.liquidity_ratios?.current_ratio?.toFixed(2) || '-'}</TableCell>
-                        <TableCell className="text-center">-</TableCell>
-                        <TableCell className="text-center">-</TableCell>
-                        <TableCell className="text-center">-</TableCell>
-                        <TableCell className="text-center">-</TableCell>
-                        <TableCell className="text-center">1.20</TableCell>
-                        <TableCell className="text-center">
-                          <Badge className="bg-green-100 text-green-800 hover:bg-green-200">Above Average</Badge>
-                        </TableCell>
-                      </TableRow>
-                      <TableRow>
-                        <TableCell className="font-medium">Quick Ratio</TableCell>
-                        <TableCell className="text-center">{company.liquidity_ratios?.quick_ratio?.toFixed(2) || '-'}</TableCell>
-                        <TableCell className="text-center">-</TableCell>
-                        <TableCell className="text-center">-</TableCell>
-                        <TableCell className="text-center">-</TableCell>
-                        <TableCell className="text-center">-</TableCell>
-                        <TableCell className="text-center">1.00</TableCell>
-                        <TableCell className="text-center">
-                          <Badge className="bg-green-100 text-green-800 hover:bg-green-200">Strong</Badge>
-                        </TableCell>
-                      </TableRow>
-                      <TableRow>
-                        <TableCell className="font-medium">Debt/Equity</TableCell>
-                        <TableCell className="text-center">{company.solvency_ratios?.debt_to_equity?.toFixed(2) || '-'}</TableCell>
-                        <TableCell className="text-center">-</TableCell>
-                        <TableCell className="text-center">-</TableCell>
-                        <TableCell className="text-center">-</TableCell>
-                        <TableCell className="text-center">-</TableCell>
-                        <TableCell className="text-center">0.85</TableCell>
-                        <TableCell className="text-center">
-                          <Badge className="bg-yellow-100 text-yellow-800 hover:bg-yellow-200">Elevated</Badge>
-                        </TableCell>
-                      </TableRow>
-                      <TableRow>
-                        <TableCell className="font-medium">ROE (%)</TableCell>
-                        <TableCell className="text-center">{company.profitability_ratios?.roe ? (company.profitability_ratios.roe * 100).toFixed(2) : '-'}</TableCell>
-                        <TableCell className="text-center">-</TableCell>
-                        <TableCell className="text-center">-</TableCell>
-                        <TableCell className="text-center">-</TableCell>
-                        <TableCell className="text-center">-</TableCell>
-                        <TableCell className="text-center">12.5</TableCell>
-                        <TableCell className="text-center">
-                          <Badge className="bg-red-100 text-red-800 hover:bg-red-200">Below Average</Badge>
-                        </TableCell>
-                      </TableRow>
-                      <TableRow>
-                        <TableCell className="font-medium">ROA (%)</TableCell>
-                        <TableCell className="text-center">{company.profitability_ratios?.roa ? (company.profitability_ratios.roa * 100).toFixed(2) : '-'}</TableCell>
-                        <TableCell className="text-center">-</TableCell>
-                        <TableCell className="text-center">-</TableCell>
-                        <TableCell className="text-center">-</TableCell>
-                        <TableCell className="text-center">-</TableCell>
-                        <TableCell className="text-center">5.20</TableCell>
-                        <TableCell className="text-center">
-                          <Badge className="bg-red-100 text-red-800 hover:bg-red-200">Weak</Badge>
-                        </TableCell>
-                      </TableRow>
-                      <TableRow>
-                        <TableCell className="font-medium">Interest Coverage</TableCell>
-                        <TableCell className="text-center">{company.solvency_ratios?.interest_coverage_ratio?.toFixed(2) || '-'}</TableCell>
-                        <TableCell className="text-center">-</TableCell>
-                        <TableCell className="text-center">-</TableCell>
-                        <TableCell className="text-center">-</TableCell>
-                        <TableCell className="text-center">-</TableCell>
-                        <TableCell className="text-center">6.50</TableCell>
-                        <TableCell className="text-center">
-                          <Badge className="bg-red-100 text-red-800 hover:bg-red-200">Concerning</Badge>
-                        </TableCell>
-                      </TableRow>
-                      <TableRow>
-                        <TableCell className="font-medium">Altman Z-Score</TableCell>
-                        <TableCell className="text-center">{company.altman_z_score?.score?.toFixed(2) || '-'}</TableCell>
-                        <TableCell className="text-center">-</TableCell>
-                        <TableCell className="text-center">-</TableCell>
-                        <TableCell className="text-center">-</TableCell>
-                        <TableCell className="text-center">-</TableCell>
-                        <TableCell className="text-center">2.60</TableCell>
-                        <TableCell className="text-center">
-                          <Badge className={`${company.altman_z_score?.zone?.toLowerCase() === 'safe' ? 'bg-green-100 text-green-800 hover:bg-green-200' : company.altman_z_score?.zone?.toLowerCase() === 'grey' ? 'bg-yellow-100 text-yellow-800 hover:bg-yellow-200' : 'bg-red-100 text-red-800 hover:bg-red-200'}`}>
-                            {company.altman_z_score?.zone || 'Unknown'}
-                          </Badge>
-                        </TableCell>
-                      </TableRow>
-                    </TableBody>
-                  </Table>
+                  {(() => {
+                    // Extract years from financial_timeline and sort chronologically (newest first)
+                    const timelineData = company.financial_timeline || [];
+                    const sortedTimeline = [...timelineData].sort((a, b) => b.year - a.year);
+                    const years = sortedTimeline.map(item => item.year);
+                    
+                    // Create lookup for historical data by year
+                    const dataByYear = {};
+                    sortedTimeline.forEach(item => {
+                      dataByYear[item.year] = item;
+                    });
+                    
+                    // Also include Z-score historical data
+                    const zscoreByYear = {};
+                    if (company.altman_z_score?.historical_trend) {
+                      company.altman_z_score.historical_trend.forEach(item => {
+                        zscoreByYear[item.year] = item.z_score;
+                      });
+                    }
+
+                    return (
+                      <Table>
+                        <TableHeader>
+                          <TableRow>
+                            <TableHead className="font-semibold text-primary">Metric</TableHead>
+                            {years.map(year => (
+                              <TableHead key={year} className="text-center font-semibold">{year}</TableHead>
+                            ))}
+                            <TableHead className="text-center font-semibold">Industry Avg</TableHead>
+                            <TableHead className="text-center font-semibold">Assessment</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          <TableRow>
+                            <TableCell className="font-medium">Current Ratio</TableCell>
+                            {years.map(year => (
+                              <TableCell key={year} className="text-center">
+                                {dataByYear[year]?.current_ratio?.toFixed(2) || '-'}
+                              </TableCell>
+                            ))}
+                            <TableCell className="text-center">1.20</TableCell>
+                            <TableCell className="text-center">
+                              <Badge className="bg-green-100 text-green-800 hover:bg-green-200">Above Average</Badge>
+                            </TableCell>
+                          </TableRow>
+                          <TableRow>
+                            <TableCell className="font-medium">Quick Ratio</TableCell>
+                            {years.map(year => (
+                              <TableCell key={year} className="text-center">
+                                {dataByYear[year]?.quick_ratio?.toFixed(2) || '-'}
+                              </TableCell>
+                            ))}
+                            <TableCell className="text-center">1.00</TableCell>
+                            <TableCell className="text-center">
+                              <Badge className="bg-green-100 text-green-800 hover:bg-green-200">Strong</Badge>
+                            </TableCell>
+                          </TableRow>
+                          <TableRow>
+                            <TableCell className="font-medium">Debt/Equity</TableCell>
+                            {years.map(year => (
+                              <TableCell key={year} className="text-center">
+                                {dataByYear[year]?.debt_to_equity?.toFixed(2) || '-'}
+                              </TableCell>
+                            ))}
+                            <TableCell className="text-center">0.85</TableCell>
+                            <TableCell className="text-center">
+                              <Badge className="bg-yellow-100 text-yellow-800 hover:bg-yellow-200">Elevated</Badge>
+                            </TableCell>
+                          </TableRow>
+                          <TableRow>
+                            <TableCell className="font-medium">ROE (%)</TableCell>
+                            {years.map(year => (
+                              <TableCell key={year} className="text-center">
+                                {dataByYear[year]?.roe ? (dataByYear[year].roe * 100).toFixed(2) : '-'}
+                              </TableCell>
+                            ))}
+                            <TableCell className="text-center">12.5</TableCell>
+                            <TableCell className="text-center">
+                              <Badge className="bg-red-100 text-red-800 hover:bg-red-200">Below Average</Badge>
+                            </TableCell>
+                          </TableRow>
+                          <TableRow>
+                            <TableCell className="font-medium">ROA (%)</TableCell>
+                            {years.map(year => (
+                              <TableCell key={year} className="text-center">
+                                {dataByYear[year]?.roa ? (dataByYear[year].roa * 100).toFixed(2) : '-'}
+                              </TableCell>
+                            ))}
+                            <TableCell className="text-center">5.20</TableCell>
+                            <TableCell className="text-center">
+                              <Badge className="bg-red-100 text-red-800 hover:bg-red-200">Weak</Badge>
+                            </TableCell>
+                          </TableRow>
+                          <TableRow>
+                            <TableCell className="font-medium">Interest Coverage</TableCell>
+                            {years.map(year => (
+                              <TableCell key={year} className="text-center">
+                                {dataByYear[year]?.times_interest_earned?.toFixed(2) || '-'}
+                              </TableCell>
+                            ))}
+                            <TableCell className="text-center">6.50</TableCell>
+                            <TableCell className="text-center">
+                              <Badge className="bg-red-100 text-red-800 hover:bg-red-200">Concerning</Badge>
+                            </TableCell>
+                          </TableRow>
+                          <TableRow>
+                            <TableCell className="font-medium">Altman Z-Score</TableCell>
+                            {years.map(year => (
+                              <TableCell key={year} className="text-center">
+                                {zscoreByYear[year]?.toFixed(2) || '-'}
+                              </TableCell>
+                            ))}
+                            <TableCell className="text-center">2.60</TableCell>
+                            <TableCell className="text-center">
+                              <Badge className={`${company.altman_z_score?.zone?.toLowerCase() === 'safe' ? 'bg-green-100 text-green-800 hover:bg-green-200' : company.altman_z_score?.zone?.toLowerCase() === 'grey' ? 'bg-yellow-100 text-yellow-800 hover:bg-yellow-200' : 'bg-red-100 text-red-800 hover:bg-red-200'}`}>
+                                {company.altman_z_score?.zone || 'Unknown'}
+                              </Badge>
+                            </TableCell>
+                          </TableRow>
+                        </TableBody>
+                      </Table>
+                    );
+                  })()}
                 </div>
               </CardContent>
             </Card>

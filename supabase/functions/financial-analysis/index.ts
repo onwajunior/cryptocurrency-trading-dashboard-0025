@@ -59,6 +59,8 @@ MANDATORY DATA SOURCE REQUIREMENTS - READ THIS CAREFULLY:
 - NEVER use current year partial data or projections
 - Source: 10-K filings, annual reports, audited year-end financial statements ONLY
 
+CRITICAL: Use actual calculated financial ratios only. Do not override or substitute them with scenario data, default values, or rounded assumptions. Use the direct result, even if negative or small.
+
 CRITICAL YEAR REPORTING REQUIREMENT:
 - The year reported in your response MUST match the actual fiscal year of the data being used
 - If you extract 2023 fiscal year data, ALL references should be to 2023, not 2024

@@ -12,7 +12,7 @@ serve(async (req) => {
   }
 
   try {
-    const { companies, assessmentId } = await req.json();
+    const { companies, assessmentId, mode = 'detailed' } = await req.json();
     
     console.log('Starting analysis for companies:', companies);
     
@@ -29,7 +29,10 @@ serve(async (req) => {
     }
 
     // Now try OpenAI API call
-    console.log('Calling OpenAI API...');
+    console.log('Calling OpenAI API... Mode:', mode);
+    
+    const isQuickMode = mode === 'quick';
+    const maxTokens = isQuickMode ? 2000 : 4000;
     
     const openaiResponse = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
@@ -39,7 +42,7 @@ serve(async (req) => {
       },
       body: JSON.stringify({
         model: 'gpt-4.1-2025-04-14',
-        max_tokens: 4000,
+        max_tokens: maxTokens,
         messages: [
           {
             role: 'system',
@@ -47,7 +50,46 @@ serve(async (req) => {
           },
           {
             role: 'user',
-            content: `You are a financial analyst. You must return ONLY valid JSON in the exact format specified. Do not include any text before or after the JSON.
+            content: isQuickMode ? 
+              `You are a financial analyst performing QUICK ANALYSIS. You must return ONLY valid JSON in the exact format specified. Do not include any text before or after the JSON.
+
+QUICK ANALYSIS MODE - ESSENTIAL METRICS ONLY:
+- Focus on core financial health indicators only
+- Provide concise, essential data without extensive calculations
+- Limit response to key ratios and Z-score
+- No detailed timelines or extensive explanations
+
+Analyze these companies: ${companies.join(', ')}. For each company, provide ONLY essential metrics:
+
+Return ONLY a JSON object with this SIMPLIFIED structure:
+
+{
+  "companies": [
+    {
+      "name": "Company Name",
+      "overall_rating": "excellent|good|fair|poor|critical",
+      "risk_level": "low|medium|high",
+      "altman_z_score": {
+        "score": 2.5,
+        "zone": "safe|grey|distress"
+      },
+      "key_ratios": {
+        "current": 1.5,
+        "debt_to_equity": 0.4,
+        "roe": 0.15
+      },
+      "summary": "Brief one-sentence financial health summary"
+    }
+  ],
+  "portfolio_summary": {
+    "average_risk_level": "low|medium|high",
+    "overall_recommendations": "Brief portfolio recommendation"
+  }
+}
+
+Use realistic financial data. Keep responses concise. Return ONLY the JSON, no other text.` 
+              : 
+              `You are a financial analyst. You must return ONLY valid JSON in the exact format specified. Do not include any text before or after the JSON.
 
 MANDATORY DATA SOURCE REQUIREMENTS - READ THIS CAREFULLY:
 **ONLY USE FULL-YEAR ANNUAL FINANCIAL STATEMENTS - NO EXCEPTIONS**

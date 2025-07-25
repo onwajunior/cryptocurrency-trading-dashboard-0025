@@ -9,6 +9,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { parseFile, parseCompaniesFromText } from "@/lib/fileParser";
 import CompanyConfirmation from "@/components/CompanyConfirmation";
 import AnalysisResults from "@/components/AnalysisResults";
+import BatchAnalysisResults from "@/components/BatchAnalysisResults";
 import { generatePDF } from "@/lib/pdfGenerator";
 
 import React from "react";
@@ -17,12 +18,13 @@ const Dashboard = () => {
   const [activeTab, setActiveTab] = useState("assessment");
   const [companies, setCompanies] = useState("");
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
-  const [currentStep, setCurrentStep] = useState<'input' | 'confirm' | 'analyzing' | 'results'>('input');
+  const [currentStep, setCurrentStep] = useState<'input' | 'confirm' | 'analyzing' | 'results' | 'batch-results'>('input');
   const [extractedCompanies, setExtractedCompanies] = useState<string[]>([]);
   const [analysisResults, setAnalysisResults] = useState<any>(null);
   const [currentAssessmentId, setCurrentAssessmentId] = useState<string | null>(null);
   const [assessments, setAssessments] = useState<any[]>([]);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [analysisMode, setAnalysisMode] = useState<'quick' | 'detailed'>('quick');
   const { toast } = useToast();
 
   // Initialize authentication
@@ -149,7 +151,8 @@ const Dashboard = () => {
       const response = await supabase.functions.invoke('financial-analysis', {
         body: {
           companies: confirmedCompanies,
-          assessmentId: assessment.id
+          assessmentId: assessment.id,
+          mode: analysisMode
         }
       });
 
@@ -158,7 +161,7 @@ const Dashboard = () => {
       }
 
       setAnalysisResults(response.data.results);
-      setCurrentStep('results');
+      setCurrentStep(analysisMode === 'quick' ? 'batch-results' : 'results');
 
       toast({
         title: "Analysis Complete",
@@ -181,6 +184,7 @@ const Dashboard = () => {
     setExtractedCompanies([]);
     setCompanies("");
     setUploadedFile(null);
+    setAnalysisMode('quick');
   };
 
   const handleSaveResults = () => {
@@ -190,6 +194,7 @@ const Dashboard = () => {
     setUploadedFile(null);
     setAnalysisResults(null);
     setCurrentAssessmentId(null);
+    setAnalysisMode('quick');
     loadAssessments(); // Refresh the library
   };
 
@@ -200,6 +205,7 @@ const Dashboard = () => {
     setUploadedFile(null);
     setAnalysisResults(null);
     setCurrentAssessmentId(null);
+    setAnalysisMode('quick');
   };
 
   const loadAssessments = async () => {
@@ -358,12 +364,45 @@ const Dashboard = () => {
                       />
                     </div>
 
+                    {/* Analysis Mode Selection */}
+                    <div className="space-y-4">
+                      <h3 className="text-lg font-medium">Analysis Mode</h3>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div 
+                          onClick={() => setAnalysisMode('quick')}
+                          className={`p-4 border rounded-lg cursor-pointer transition-colors ${
+                            analysisMode === 'quick' 
+                              ? 'border-primary bg-primary/10' 
+                              : 'border-border hover:border-primary/50'
+                          }`}
+                        >
+                          <h4 className="font-medium mb-2">Quick Analysis</h4>
+                          <p className="text-sm text-muted-foreground">
+                            Essential metrics only - Z-score, key ratios, risk level. Best for multiple companies.
+                          </p>
+                        </div>
+                        <div 
+                          onClick={() => setAnalysisMode('detailed')}
+                          className={`p-4 border rounded-lg cursor-pointer transition-colors ${
+                            analysisMode === 'detailed' 
+                              ? 'border-primary bg-primary/10' 
+                              : 'border-border hover:border-primary/50'
+                          }`}
+                        >
+                          <h4 className="font-medium mb-2">Detailed Analysis</h4>
+                          <p className="text-sm text-muted-foreground">
+                            Comprehensive analysis with full breakdown, timeline, and recommendations. Best for single company.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+
                     <Button 
                       onClick={handleAnalyze} 
                       className="w-full bg-gradient-primary"
                       disabled={!companies.trim() && !uploadedFile}
                     >
-                      Start Risk Analysis
+                      Start {analysisMode === 'quick' ? 'Quick' : 'Detailed'} Analysis
                     </Button>
                   </CardContent>
                 </Card>
@@ -396,6 +435,25 @@ const Dashboard = () => {
                   assessmentName={assessments.find(a => a.id === currentAssessmentId)?.name || `Risk Assessment - ${new Date().toLocaleDateString()}`}
                   onSave={handleSaveResults}
                   onDelete={handleDeleteResults}
+                />
+              )}
+
+              {currentStep === 'batch-results' && analysisResults && currentAssessmentId && (
+                <BatchAnalysisResults
+                  results={analysisResults}
+                  assessmentId={currentAssessmentId}
+                  assessmentName={assessments.find(a => a.id === currentAssessmentId)?.name || `Risk Assessment - ${new Date().toLocaleDateString()}`}
+                  onSave={handleSaveResults}
+                  onDelete={handleDeleteResults}
+                  onViewDetails={(companyName) => {
+                    // Switch to detailed mode and analyze single company
+                    setAnalysisMode('detailed');
+                    setCompanies(companyName);
+                    setCurrentStep('analyzing');
+                    
+                    // Trigger detailed analysis for the specific company
+                    handleConfirmCompanies([companyName]);
+                  }}
                 />
               )}
             </>

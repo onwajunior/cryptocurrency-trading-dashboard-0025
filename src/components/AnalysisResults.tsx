@@ -445,7 +445,11 @@ const AnalysisResults = ({
                             ))}
                             <TableCell className="text-center">1.20</TableCell>
                             <TableCell className="text-center">
-                              <Badge className="bg-green-100 text-green-800 hover:bg-green-200">Above Average</Badge>
+                              {(() => {
+                                const currentRatio = dataByYear[years[0]]?.current_ratio || 0;
+                                const assessment = calculateAssessment(currentRatio, 1.20, true);
+                                return <Badge className={assessment.className}>{assessment.label}</Badge>;
+                              })()}
                             </TableCell>
                           </TableRow>
                           <TableRow>
@@ -457,7 +461,11 @@ const AnalysisResults = ({
                             ))}
                             <TableCell className="text-center">1.00</TableCell>
                             <TableCell className="text-center">
-                              <Badge className="bg-green-100 text-green-800 hover:bg-green-200">Strong</Badge>
+                              {(() => {
+                                const quickRatio = dataByYear[years[0]]?.quick_ratio || 0;
+                                const assessment = calculateAssessment(quickRatio, 1.00, true);
+                                return <Badge className={assessment.className}>{assessment.label}</Badge>;
+                              })()}
                             </TableCell>
                           </TableRow>
                           <TableRow>
@@ -469,7 +477,11 @@ const AnalysisResults = ({
                             ))}
                             <TableCell className="text-center">0.85</TableCell>
                             <TableCell className="text-center">
-                              <Badge className="bg-yellow-100 text-yellow-800 hover:bg-yellow-200">Elevated</Badge>
+                              {(() => {
+                                const debtToEquity = dataByYear[years[0]]?.debt_to_equity || 0;
+                                const assessment = calculateAssessment(debtToEquity, 0.85, false); // Lower is better
+                                return <Badge className={assessment.className}>{assessment.label}</Badge>;
+                              })()}
                             </TableCell>
                           </TableRow>
                           <TableRow>
@@ -513,7 +525,11 @@ const AnalysisResults = ({
                             ))}
                             <TableCell className="text-center">6.50</TableCell>
                             <TableCell className="text-center">
-                              <Badge className="bg-red-100 text-red-800 hover:bg-red-200">Concerning</Badge>
+                              {(() => {
+                                const interestCoverage = dataByYear[years[0]]?.times_interest_earned || 0;
+                                const assessment = calculateAssessment(interestCoverage, 6.50, true);
+                                return <Badge className={assessment.className}>{assessment.label}</Badge>;
+                              })()}
                             </TableCell>
                           </TableRow>
                           <TableRow>

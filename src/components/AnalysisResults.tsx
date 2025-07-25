@@ -470,114 +470,132 @@ const AnalysisResults = ({ results, assessmentId, assessmentName, onSave, onDele
               </CardHeader>
               <CardContent>
                 <div className="overflow-x-auto">
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead className="font-semibold text-primary">Metric</TableHead>
-                        <TableHead className="text-center font-semibold">2024</TableHead>
-                        <TableHead className="text-center font-semibold">2023</TableHead>
-                        <TableHead className="text-center font-semibold">2022</TableHead>
-                        <TableHead className="text-center font-semibold">2021</TableHead>
-                        <TableHead className="text-center font-semibold">2020</TableHead>
-                        <TableHead className="text-center font-semibold">Industry Avg</TableHead>
-                        <TableHead className="text-center font-semibold">Assessment</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      <TableRow>
-                        <TableCell className="font-medium">Current Ratio</TableCell>
-                        <TableCell className="text-center">{company.liquidity_ratios?.current_ratio?.toFixed(2) || '-'}</TableCell>
-                        <TableCell className="text-center">-</TableCell>
-                        <TableCell className="text-center">-</TableCell>
-                        <TableCell className="text-center">-</TableCell>
-                        <TableCell className="text-center">-</TableCell>
-                        <TableCell className="text-center">1.20</TableCell>
-                        <TableCell className="text-center">
-                          <Badge className="bg-green-100 text-green-800 hover:bg-green-200">Above Average</Badge>
-                        </TableCell>
-                      </TableRow>
-                      <TableRow>
-                        <TableCell className="font-medium">Quick Ratio</TableCell>
-                        <TableCell className="text-center">{company.liquidity_ratios?.quick_ratio?.toFixed(2) || '-'}</TableCell>
-                        <TableCell className="text-center">-</TableCell>
-                        <TableCell className="text-center">-</TableCell>
-                        <TableCell className="text-center">-</TableCell>
-                        <TableCell className="text-center">-</TableCell>
-                        <TableCell className="text-center">1.00</TableCell>
-                        <TableCell className="text-center">
-                          <Badge className="bg-green-100 text-green-800 hover:bg-green-200">Strong</Badge>
-                        </TableCell>
-                      </TableRow>
-                      <TableRow>
-                        <TableCell className="font-medium">Debt/Equity</TableCell>
-                        <TableCell className="text-center">{company.solvency_ratios?.debt_to_equity?.toFixed(2) || '-'}</TableCell>
-                        <TableCell className="text-center">-</TableCell>
-                        <TableCell className="text-center">-</TableCell>
-                        <TableCell className="text-center">-</TableCell>
-                        <TableCell className="text-center">-</TableCell>
-                        <TableCell className="text-center">0.85</TableCell>
-                        <TableCell className="text-center">
-                          <Badge className="bg-yellow-100 text-yellow-800 hover:bg-yellow-200">Elevated</Badge>
-                        </TableCell>
-                      </TableRow>
-                      <TableRow>
-                        <TableCell className="font-medium">ROE (%)</TableCell>
-                        <TableCell className="text-center">{company.profitability_ratios?.roe ? (company.profitability_ratios.roe * 100).toFixed(2) : '-'}</TableCell>
-                        <TableCell className="text-center">-</TableCell>
-                        <TableCell className="text-center">-</TableCell>
-                        <TableCell className="text-center">-</TableCell>
-                        <TableCell className="text-center">-</TableCell>
-                        <TableCell className="text-center">12.5</TableCell>
-                        <TableCell className="text-center">
-                          <Badge className="bg-red-100 text-red-800 hover:bg-red-200">Below Average</Badge>
-                        </TableCell>
-                      </TableRow>
-                      <TableRow>
-                        <TableCell className="font-medium">ROA (%)</TableCell>
-                        <TableCell className="text-center">{company.profitability_ratios?.roa ? (company.profitability_ratios.roa * 100).toFixed(2) : '-'}</TableCell>
-                        <TableCell className="text-center">-</TableCell>
-                        <TableCell className="text-center">-</TableCell>
-                        <TableCell className="text-center">-</TableCell>
-                        <TableCell className="text-center">-</TableCell>
-                        <TableCell className="text-center">5.20</TableCell>
-                        <TableCell className="text-center">
-                          <Badge className="bg-red-100 text-red-800 hover:bg-red-200">Weak</Badge>
-                        </TableCell>
-                      </TableRow>
-                      <TableRow>
-                        <TableCell className="font-medium">Interest Coverage</TableCell>
-                        <TableCell className="text-center">{company.solvency_ratios?.interest_coverage_ratio?.toFixed(2) || '-'}</TableCell>
-                        <TableCell className="text-center">-</TableCell>
-                        <TableCell className="text-center">-</TableCell>
-                        <TableCell className="text-center">-</TableCell>
-                        <TableCell className="text-center">-</TableCell>
-                        <TableCell className="text-center">6.50</TableCell>
-                        <TableCell className="text-center">
-                          <Badge className="bg-red-100 text-red-800 hover:bg-red-200">Concerning</Badge>
-                        </TableCell>
-                      </TableRow>
-                      <TableRow>
-                        <TableCell className="font-medium">Altman Z-Score</TableCell>
-                        <TableCell className="text-center">{company.altman_z_score?.score?.toFixed(2) || '-'}</TableCell>
-                        <TableCell className="text-center">-</TableCell>
-                        <TableCell className="text-center">-</TableCell>
-                        <TableCell className="text-center">-</TableCell>
-                        <TableCell className="text-center">-</TableCell>
-                        <TableCell className="text-center">2.60</TableCell>
-                        <TableCell className="text-center">
-                          <Badge className={`${
-                            company.altman_z_score?.zone?.toLowerCase() === 'safe' 
-                              ? 'bg-green-100 text-green-800 hover:bg-green-200' 
-                              : company.altman_z_score?.zone?.toLowerCase() === 'grey'
-                              ? 'bg-yellow-100 text-yellow-800 hover:bg-yellow-200'
-                              : 'bg-red-100 text-red-800 hover:bg-red-200'
-                          }`}>
-                            {company.altman_z_score?.zone || 'Unknown'}
-                          </Badge>
-                        </TableCell>
-                      </TableRow>
-                    </TableBody>
-                  </Table>
+                  {company.financial_timeline && company.financial_timeline.length > 0 ? (
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead className="font-semibold text-primary">Metric</TableHead>
+                          {company.financial_timeline.slice(0, 5).map((yearData: any) => (
+                            <TableHead key={yearData.year} className="text-center font-semibold">{yearData.year}</TableHead>
+                          ))}
+                          <TableHead className="text-center font-semibold">Industry Avg</TableHead>
+                          <TableHead className="text-center font-semibold">Assessment</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        <TableRow>
+                          <TableCell className="font-medium">Current Ratio</TableCell>
+                          {company.financial_timeline.slice(0, 5).map((yearData: any) => (
+                            <TableCell key={yearData.year} className="text-center">
+                              {yearData.current_ratio?.toFixed(2) || '-'}
+                            </TableCell>
+                          ))}
+                          <TableCell className="text-center">1.20</TableCell>
+                          <TableCell className="text-center">
+                            <Badge className="bg-green-100 text-green-800 hover:bg-green-200">Above Average</Badge>
+                          </TableCell>
+                        </TableRow>
+                        <TableRow>
+                          <TableCell className="font-medium">Quick Ratio</TableCell>
+                          {company.financial_timeline.slice(0, 5).map((yearData: any) => (
+                            <TableCell key={yearData.year} className="text-center">
+                              {yearData.quick_ratio?.toFixed(2) || '-'}
+                            </TableCell>
+                          ))}
+                          <TableCell className="text-center">1.00</TableCell>
+                          <TableCell className="text-center">
+                            <Badge className="bg-green-100 text-green-800 hover:bg-green-200">Strong</Badge>
+                          </TableCell>
+                        </TableRow>
+                        <TableRow>
+                          <TableCell className="font-medium">Debt/Equity</TableCell>
+                          {company.financial_timeline.slice(0, 5).map((yearData: any) => (
+                            <TableCell key={yearData.year} className="text-center">
+                              {yearData.debt_to_equity?.toFixed(2) || '-'}
+                            </TableCell>
+                          ))}
+                          <TableCell className="text-center">0.85</TableCell>
+                          <TableCell className="text-center">
+                            <Badge className="bg-yellow-100 text-yellow-800 hover:bg-yellow-200">Elevated</Badge>
+                          </TableCell>
+                        </TableRow>
+                        <TableRow>
+                          <TableCell className="font-medium">ROE (%)</TableCell>
+                          {company.financial_timeline.slice(0, 5).map((yearData: any) => (
+                            <TableCell key={yearData.year} className="text-center">
+                              {yearData.roe ? (yearData.roe * 100).toFixed(2) : '-'}
+                            </TableCell>
+                          ))}
+                          <TableCell className="text-center">12.5</TableCell>
+                          <TableCell className="text-center">
+                            <Badge className="bg-green-100 text-green-800 hover:bg-green-200">Excellent</Badge>
+                          </TableCell>
+                        </TableRow>
+                        <TableRow>
+                          <TableCell className="font-medium">ROA (%)</TableCell>
+                          {company.financial_timeline.slice(0, 5).map((yearData: any) => (
+                            <TableCell key={yearData.year} className="text-center">
+                              {yearData.roa ? (yearData.roa * 100).toFixed(2) : '-'}
+                            </TableCell>
+                          ))}
+                          <TableCell className="text-center">5.20</TableCell>
+                          <TableCell className="text-center">
+                            <Badge className="bg-green-100 text-green-800 hover:bg-green-200">Strong</Badge>
+                          </TableCell>
+                        </TableRow>
+                        <TableRow>
+                          <TableCell className="font-medium">Net Margin (%)</TableCell>
+                          {company.financial_timeline.slice(0, 5).map((yearData: any) => (
+                            <TableCell key={yearData.year} className="text-center">
+                              {yearData.net_margin ? (yearData.net_margin * 100).toFixed(2) : '-'}
+                            </TableCell>
+                          ))}
+                          <TableCell className="text-center">8.50</TableCell>
+                          <TableCell className="text-center">
+                            <Badge className="bg-green-100 text-green-800 hover:bg-green-200">Above Average</Badge>
+                          </TableCell>
+                        </TableRow>
+                        <TableRow>
+                          <TableCell className="font-medium">Interest Coverage</TableCell>
+                          {company.financial_timeline.slice(0, 5).map((yearData: any) => (
+                            <TableCell key={yearData.year} className="text-center">
+                              {yearData.times_interest_earned?.toFixed(2) || '-'}
+                            </TableCell>
+                          ))}
+                          <TableCell className="text-center">6.50</TableCell>
+                          <TableCell className="text-center">
+                            <Badge className="bg-green-100 text-green-800 hover:bg-green-200">Strong</Badge>
+                          </TableCell>
+                        </TableRow>
+                        {company.altman_z_score?.historical_trend && (
+                          <TableRow>
+                            <TableCell className="font-medium">Altman Z-Score</TableCell>
+                            {company.altman_z_score.historical_trend.slice(-5).map((trendData: any) => (
+                              <TableCell key={trendData.year} className="text-center">
+                                {trendData.z_score?.toFixed(2) || '-'}
+                              </TableCell>
+                            ))}
+                            <TableCell className="text-center">2.60</TableCell>
+                            <TableCell className="text-center">
+                              <Badge className={`${
+                                company.altman_z_score?.zone?.toLowerCase() === 'safe' 
+                                  ? 'bg-green-100 text-green-800 hover:bg-green-200' 
+                                  : company.altman_z_score?.zone?.toLowerCase() === 'grey'
+                                  ? 'bg-yellow-100 text-yellow-800 hover:bg-yellow-200'
+                                  : 'bg-red-100 text-red-800 hover:bg-red-200'
+                              }`}>
+                                {company.altman_z_score?.zone || 'Unknown'}
+                              </Badge>
+                            </TableCell>
+                          </TableRow>
+                        )}
+                      </TableBody>
+                    </Table>
+                  ) : (
+                    <p className="text-muted-foreground text-center py-8">
+                      No historical financial data available for ratio analysis
+                    </p>
+                  )}
                 </div>
               </CardContent>
             </Card>

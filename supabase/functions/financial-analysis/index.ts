@@ -51,19 +51,27 @@ serve(async (req) => {
 
 MANDATORY DATA SOURCE REQUIREMENTS - READ THIS CAREFULLY:
 **ONLY USE FULL-YEAR ANNUAL FINANCIAL STATEMENTS - NO EXCEPTIONS**
-- For companies reporting in 2025: Use ONLY their 2024 year-end (December 31, 2024) annual financial statements
-- For companies reporting in 2024: Use ONLY their 2023 year-end annual financial statements  
+- Use the company's most recently available COMPLETE fiscal year data (typically their latest 10-K filing)
+- For most public companies in 2025: Use fiscal year 2024 data (ended December 31, 2024 or company's fiscal year end)
+- ENSURE YEAR ALIGNMENT: If using 2024 data, report it as 2024. If using 2023 data, report it as 2023.
 - NEVER use quarterly reports (Q1, Q2, Q3, Q4), interim reports, or trailing twelve months (TTM)
 - NEVER annualize or estimate data from partial periods
 - NEVER use current year partial data or projections
 - Source: 10-K filings, annual reports, audited year-end financial statements ONLY
 
+CRITICAL YEAR REPORTING REQUIREMENT:
+- The year reported in your response MUST match the actual fiscal year of the data being used
+- If you extract 2023 fiscal year data, ALL references should be to 2023, not 2024
+- The "financial_timeline" array must show the CORRECT fiscal years for each data point
+- The "historical_trend" array must use ACTUAL fiscal years, not assumed years
+
 VERIFICATION STEPS YOU MUST FOLLOW:
 1. Identify the company's most recent completed fiscal year (usually December 31)
 2. Locate their official 10-K or annual report for that completed year
 3. Extract financial data ONLY from that single annual report
-4. Double-check that you are NOT using any quarterly or interim data
+4. Ensure the fiscal year reported matches the data extracted (e.g., if 2023 10-K data, report as 2023)
 5. Calculate all ratios using these verified annual figures
+6. For historical data, use actual fiscal years from previous 10-K filings
 
 Analyze these companies: ${companies.join(', ')}. For each company, determine the appropriate Altman Z-score formula based on company type:
 CALCULATION BREAKDOWN REQUIREMENTS:
@@ -156,11 +164,74 @@ Return ONLY a JSON object with this exact structure:
       },
       "financial_timeline": [
         {
-          "year": 2024,
+          "year": 2023,
           "revenue": 400000000000,
           "net_income": 50000000000,
           "total_debt": 100000000000,
+          "current_ratio": 1.5,
+          "quick_ratio": 1.2,
+          "debt_to_equity": 0.4,
+          "roe": 0.15,
+          "roa": 0.08,
+          "net_margin": 0.12,
+          "times_interest_earned": 8.5,
           "key_events": "Major product launch"
+        },
+        {
+          "year": 2022,
+          "revenue": 380000000000,
+          "net_income": 48000000000,
+          "total_debt": 95000000000,
+          "current_ratio": 1.4,
+          "quick_ratio": 1.1,
+          "debt_to_equity": 0.42,
+          "roe": 0.14,
+          "roa": 0.075,
+          "net_margin": 0.11,
+          "times_interest_earned": 8.2,
+          "key_events": "Market expansion"
+        },
+        {
+          "year": 2021,
+          "revenue": 365000000000,
+          "net_income": 45000000000,
+          "total_debt": 90000000000,
+          "current_ratio": 1.3,
+          "quick_ratio": 1.0,
+          "debt_to_equity": 0.45,
+          "roe": 0.13,
+          "roa": 0.07,
+          "net_margin": 0.10,
+          "times_interest_earned": 7.8,
+          "key_events": "Digital transformation"
+        },
+        {
+          "year": 2020,
+          "revenue": 350000000000,
+          "net_income": 42000000000,
+          "total_debt": 85000000000,
+          "current_ratio": 1.2,
+          "quick_ratio": 0.9,
+          "debt_to_equity": 0.48,
+          "roe": 0.12,
+          "roa": 0.065,
+          "net_margin": 0.095,
+          "times_interest_earned": 7.5,
+          "key_events": "Pandemic response"
+        },
+        {
+          "year": 2019,
+          "revenue": 335000000000,
+          "net_income": 40000000000,
+          "total_debt": 80000000000,
+          "current_ratio": 1.1,
+          "quick_ratio": 0.85,
+          "debt_to_equity": 0.50,
+          "roe": 0.11,
+          "roa": 0.06,
+          "net_margin": 0.09,
+          "times_interest_earned": 7.2,
+          "key_events": "Strategic initiatives"
         }
       ],
       "risk_assessment": {
@@ -189,7 +260,7 @@ Return ONLY a JSON object with this exact structure:
   }
 }
 
-Use realistic financial data and ratios for each company. Include 5-10 years of timeline data (no more than 10 years back). Calculate proper Altman Z-scores (>2.99=safe, 1.8-2.99=grey, <1.8=distress). Return ONLY the JSON, no other text.`
+Use realistic financial data and ratios for each company. Include 5 years of timeline data with COMPLETE financial ratios for EACH year (current_ratio, quick_ratio, debt_to_equity, roe, roa, net_margin, times_interest_earned). ENSURE ALL YEARS ALIGN CORRECTLY - if extracting 2023 data, report it as 2023, not 2024. Calculate proper Altman Z-scores (>2.99=safe, 1.8-2.99=grey, <1.8=distress). Return ONLY the JSON, no other text.`
           }
         ],
       }),

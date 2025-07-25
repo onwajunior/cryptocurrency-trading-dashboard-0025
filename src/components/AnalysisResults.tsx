@@ -308,40 +308,172 @@ const AnalysisResults = ({ results, assessmentId, assessmentName, onSave, onDele
       )}
 
       {/* Individual Company Analysis */}
-      <div className="space-y-4">
+      <div className="space-y-8">
         {results.companies.map((company: any, index: number) => (
-          <Card key={index} className="glass-card">
-            <CardHeader>
-              <div className="flex justify-between items-start">
-                <div>
-                  <CardTitle className="text-xl">{company.name}</CardTitle>
-                  {company.overall_rating && (
-                    <Badge className={`mt-2 ${getStatusBadgeStyle(company.overall_rating)}`}>
-                      {company.overall_rating.toUpperCase()}
-                    </Badge>
+          <div key={index} className="space-y-6">
+            {/* Professional Header */}
+            <Card className="glass-card bg-gradient-to-r from-primary/10 to-primary/5 border-primary/20">
+              <CardContent className="p-8 text-center">
+                <h1 className="text-3xl font-bold mb-2">{company.name} Financial Risk Assessment</h1>
+                <p className="text-lg text-muted-foreground">
+                  Comprehensive Analysis as of {results.analysis_date} | Market Analysis
+                </p>
+              </CardContent>
+            </Card>
+
+            {/* Executive Summary */}
+            <Card className="glass-card">
+              <CardHeader>
+                <CardTitle className="text-xl text-primary">Executive Summary</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="p-4 bg-primary/5 border-l-4 border-primary rounded-r-lg">
+                  <p className="font-medium text-foreground">Overall Financial Health:</p>
+                  <p className="text-muted-foreground mt-1">
+                    {company.name} maintains a {company.overall_rating?.toLowerCase() || 'moderate'} financial position. 
+                    {company.altman_z_score?.score && ` The company's Altman Z-Score of ${company.altman_z_score.score.toFixed(2)} places it in the ${company.altman_z_score.zone?.toLowerCase()} zone with ${company.altman_z_score.zone?.toLowerCase() === 'safe' ? 'low' : company.altman_z_score.zone?.toLowerCase() === 'grey' ? 'moderate' : 'high'} bankruptcy risk.`}
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Prominent Z-Score Display */}
+            {company.altman_z_score?.score && (
+              <Card className={`glass-card ${
+                company.altman_z_score.zone?.toLowerCase() === 'safe' ? 'bg-green-500/10 border-green-500/30' :
+                company.altman_z_score.zone?.toLowerCase() === 'grey' ? 'bg-yellow-500/10 border-yellow-500/30' :
+                'bg-red-500/10 border-red-500/30'
+              }`}>
+                <CardContent className="p-8 text-center">
+                  <h2 className="text-xl font-semibold mb-4 text-foreground">Altman Z-Score</h2>
+                  <div className={`text-6xl font-bold mb-2 ${
+                    company.altman_z_score.zone?.toLowerCase() === 'safe' ? 'text-green-600' :
+                    company.altman_z_score.zone?.toLowerCase() === 'grey' ? 'text-yellow-600' :
+                    'text-red-600'
+                  }`}>
+                    {company.altman_z_score.score.toFixed(2)}
+                  </div>
+                  <p className={`text-lg font-medium ${
+                    company.altman_z_score.zone?.toLowerCase() === 'safe' ? 'text-green-600' :
+                    company.altman_z_score.zone?.toLowerCase() === 'grey' ? 'text-yellow-600' :
+                    'text-red-600'
+                  }`}>
+                    {company.altman_z_score.zone?.toUpperCase()} ZONE - {
+                      company.altman_z_score.zone?.toLowerCase() === 'safe' ? 'Low Bankruptcy Risk' :
+                      company.altman_z_score.zone?.toLowerCase() === 'grey' ? 'Moderate Risk' :
+                      'High Risk'
+                    }
+                  </p>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Key Financial Metrics Grid */}
+            <Card className="glass-card">
+              <CardHeader>
+                <CardTitle className="text-xl text-primary">Key Financial Metrics</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                  {/* Current Ratio */}
+                  {company.liquidity_ratios?.current_ratio && (
+                    <div className="p-4 border-l-4 border-blue-500 bg-blue-50/50 dark:bg-blue-950/20 rounded-r-lg">
+                      <h4 className="text-sm font-medium text-blue-600 dark:text-blue-400">Current Ratio</h4>
+                      <p className="text-2xl font-bold text-green-600 mt-1">{company.liquidity_ratios.current_ratio.toFixed(2)}</p>
+                      <p className="text-xs text-muted-foreground">Strong liquidity position</p>
+                    </div>
+                  )}
+
+                  {/* Quick Ratio */}
+                  {company.liquidity_ratios?.quick_ratio && (
+                    <div className="p-4 border-l-4 border-blue-500 bg-blue-50/50 dark:bg-blue-950/20 rounded-r-lg">
+                      <h4 className="text-sm font-medium text-blue-600 dark:text-blue-400">Quick Ratio</h4>
+                      <p className="text-2xl font-bold text-green-600 mt-1">{company.liquidity_ratios.quick_ratio.toFixed(2)}</p>
+                      <p className="text-xs text-muted-foreground">Excellent liquidity</p>
+                    </div>
+                  )}
+
+                  {/* Debt-to-Equity */}
+                  {company.solvency_ratios?.debt_to_equity && (
+                    <div className="p-4 border-l-4 border-blue-500 bg-blue-50/50 dark:bg-blue-950/20 rounded-r-lg">
+                      <h4 className="text-sm font-medium text-blue-600 dark:text-blue-400">Debt-to-Equity</h4>
+                      <p className={`text-2xl font-bold mt-1 ${
+                        company.solvency_ratios.debt_to_equity < 1 ? 'text-green-600' : 
+                        company.solvency_ratios.debt_to_equity < 2 ? 'text-yellow-600' : 'text-red-600'
+                      }`}>
+                        {company.solvency_ratios.debt_to_equity.toFixed(2)}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        {company.solvency_ratios.debt_to_equity < 1 ? 'Moderate leverage' : 'Elevated'}
+                      </p>
+                    </div>
+                  )}
+
+                  {/* Return on Equity */}
+                  {company.profitability_ratios?.roe && (
+                    <div className="p-4 border-l-4 border-blue-500 bg-blue-50/50 dark:bg-blue-950/20 rounded-r-lg">
+                      <h4 className="text-sm font-medium text-blue-600 dark:text-blue-400">Return on Equity</h4>
+                      <p className={`text-2xl font-bold mt-1 ${
+                        company.profitability_ratios.roe > 0.15 ? 'text-green-600' : 
+                        company.profitability_ratios.roe > 0.05 ? 'text-yellow-600' : 'text-red-600'
+                      }`}>
+                        {(company.profitability_ratios.roe * 100).toFixed(2)}%
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        {company.profitability_ratios.roe > 0.15 ? 'Strong returns' : 
+                         company.profitability_ratios.roe > 0.05 ? 'Moderate' : 'Below average'}
+                      </p>
+                    </div>
+                  )}
+
+                  {/* Interest Coverage */}
+                  {company.solvency_ratios?.times_interest_earned && (
+                    <div className="p-4 border-l-4 border-blue-500 bg-blue-50/50 dark:bg-blue-950/20 rounded-r-lg">
+                      <h4 className="text-sm font-medium text-blue-600 dark:text-blue-400">Interest Coverage</h4>
+                      <p className={`text-2xl font-bold mt-1 ${
+                        company.solvency_ratios.times_interest_earned > 5 ? 'text-green-600' : 
+                        company.solvency_ratios.times_interest_earned > 2.5 ? 'text-yellow-600' : 'text-red-600'
+                      }`}>
+                        {company.solvency_ratios.times_interest_earned.toFixed(1)}x
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        {company.solvency_ratios.times_interest_earned > 5 ? 'Strong coverage' : 
+                         company.solvency_ratios.times_interest_earned > 2.5 ? 'Adequate' : 'Concerning level'}
+                      </p>
+                    </div>
+                  )}
+
+                  {/* Net Margin */}
+                  {company.profitability_ratios?.net_margin && (
+                    <div className="p-4 border-l-4 border-blue-500 bg-blue-50/50 dark:bg-blue-950/20 rounded-r-lg">
+                      <h4 className="text-sm font-medium text-blue-600 dark:text-blue-400">Net Margin</h4>
+                      <p className={`text-2xl font-bold mt-1 ${
+                        company.profitability_ratios.net_margin > 0.15 ? 'text-green-600' : 
+                        company.profitability_ratios.net_margin > 0.05 ? 'text-yellow-600' : 'text-red-600'
+                      }`}>
+                        {(company.profitability_ratios.net_margin * 100).toFixed(2)}%
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        {company.profitability_ratios.net_margin > 0.15 ? 'Excellent pricing power' : 
+                         company.profitability_ratios.net_margin > 0.05 ? 'Good margins' : 'Needs improvement'}
+                      </p>
+                    </div>
                   )}
                 </div>
-                {company.altman_z_score?.score && (
-                  <div className="text-right">
-                    <p className="text-sm text-muted-foreground">Altman Z-Score</p>
-                    <p className="text-2xl font-bold">{company.altman_z_score.score.toFixed(2)}</p>
-                    <Badge className={getStatusBadgeStyle(company.altman_z_score.zone)}>
-                      {company.altman_z_score.zone?.toUpperCase()}
-                    </Badge>
-                  </div>
-                )}
-              </div>
-            </CardHeader>
+              </CardContent>
+            </Card>
 
-            <CardContent>
-              <Tabs defaultValue="ratios" className="w-full">
-                <TabsList className="grid w-full grid-cols-5">
-                  <TabsTrigger value="ratios">Financial Ratios</TabsTrigger>
-                  <TabsTrigger value="timeline">Timeline</TabsTrigger>
-                  <TabsTrigger value="risk">Risk Assessment</TabsTrigger>
-                  <TabsTrigger value="zscore">Z-Score</TabsTrigger>
-                  <TabsTrigger value="summary">Summary</TabsTrigger>
-                </TabsList>
+            {/* Additional Analysis Tabs */}
+            <Card className="glass-card">
+              <CardContent>
+                <Tabs defaultValue="ratios" className="w-full">
+                  <TabsList className="grid w-full grid-cols-5">
+                    <TabsTrigger value="ratios">Financial Ratios</TabsTrigger>
+                    <TabsTrigger value="timeline">Timeline</TabsTrigger>
+                    <TabsTrigger value="risk">Risk Assessment</TabsTrigger>
+                    <TabsTrigger value="zscore">Z-Score</TabsTrigger>
+                    <TabsTrigger value="summary">Summary</TabsTrigger>
+                  </TabsList>
 
                 <TabsContent value="ratios" className="space-y-4">
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -626,9 +758,10 @@ const AnalysisResults = ({ results, assessmentId, assessmentName, onSave, onDele
                     )}
                   </div>
                 </TabsContent>
-              </Tabs>
-            </CardContent>
-          </Card>
+                </Tabs>
+              </CardContent>
+            </Card>
+          </div>
         ))}
       </div>
     </div>

@@ -230,7 +230,10 @@ const AnalysisResults = ({
                 <h4 className="font-medium mb-4">5-Year Z-Score Trend</h4>
                 <div className="h-64">
                   <ResponsiveContainer width="100%" height="100%">
-                    <LineChart data={results.portfolio_summary.zscore_trend}>
+                    <LineChart data={results.portfolio_summary.zscore_trend.map((item: any) => ({
+                      year: item.year,
+                      zscore: item.zscore
+                    }))}>
                       <CartesianGrid strokeDasharray="3 3" />
                       <XAxis dataKey="year" />
                       <YAxis domain={[0, 'dataMax + 1']} />

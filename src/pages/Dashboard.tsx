@@ -19,7 +19,7 @@ import React from "react";
 const ConsistencyIndicator = ({ consistency, score, cacheStatus }: {
   consistency: any;
   score: number;
-  cacheStatus: 'none' | 'hit' | 'miss';
+  cacheStatus: 'none' | 'hit' | 'miss' | 'invalid';
 }) => {
   if (!consistency) return null;
 
@@ -94,7 +94,7 @@ const Dashboard = () => {
   
   // Enhanced state for consistency tracking
   const [analysisConsistency, setAnalysisConsistency] = useState<any>(null);
-  const [cacheStatus, setCacheStatus] = useState<'none' | 'hit' | 'miss'>('none');
+  const [cacheStatus, setCacheStatus] = useState<'none' | 'hit' | 'miss' | 'invalid'>('none');
   const [consistencyScore, setConsistencyScore] = useState<number>(0);
 
   // Initialize authentication
@@ -188,22 +188,37 @@ const Dashboard = () => {
         console.log('🎯 Cached result structure:', cachedResult);
         console.log('🎯 Cached data structure:', cachedResult.data);
         
-        // The cached data structure should match what AnalysisResults expects
-        const analysisData = cachedResult.data?.results || cachedResult.data;
-        console.log('🎯 Final analysis data for component:', analysisData);
+        // Extract the correct data structure for AnalysisResults component
+        let analysisData;
+        if (cachedResult.data?.companies) {
+          // Direct cache structure
+          analysisData = cachedResult.data;
+        } else if (cachedResult.data?.results?.companies) {
+          // Nested results structure
+          analysisData = cachedResult.data.results;
+        } else {
+          console.warn('⚠️ Cached data does not contain companies array');
+          setCacheStatus('invalid');
+          // Continue to fresh analysis
+        }
         
-        setCacheStatus('hit');
-        setAnalysisResults(analysisData);
-        setAnalysisConsistency(cachedResult.consistency);
-        setConsistencyScore(98); // High score for cached results
-        
-        toast({
-          title: "Analysis Retrieved from Cache",
-          description: `Maximum consistency achieved! ${formatConsistencyReport(cachedResult.consistency)}`,
-        });
-        
-        setCurrentStep('results');
-        return;
+        if (analysisData?.companies) {
+          console.log('🎯 Final analysis data for component:', analysisData);
+          console.log('🎯 Companies count:', analysisData.companies.length);
+          
+          setCacheStatus('hit');
+          setAnalysisResults(analysisData);
+          setAnalysisConsistency(cachedResult.consistency);
+          setConsistencyScore(98); // High score for cached results
+          
+          toast({
+            title: "Analysis Retrieved from Cache",
+            description: `Maximum consistency achieved! ${formatConsistencyReport(cachedResult.consistency)}`,
+          });
+          
+          setCurrentStep('results');
+          return;
+        }
       }
 
       setCacheStatus('miss');
@@ -289,10 +304,11 @@ const Dashboard = () => {
         console.log('🔥 Analysis data structure:', analysisData);
         console.log('🔥 Analysis data companies:', analysisData?.companies);
 
-        // Cache the results for future consistency
+        // Cache the results for future consistency - store the actual analysisData 
         enhancedAnalysis.setCachedAnalysis(confirmedCompanies, analysisMode, {
-          data: analysisData,
-          consistency: consistencyData
+          data: analysisData,  // Store the results directly, not nested
+          consistency: consistencyData,
+          timestamp: new Date().toISOString()
         });
 
         // Calculate consistency score

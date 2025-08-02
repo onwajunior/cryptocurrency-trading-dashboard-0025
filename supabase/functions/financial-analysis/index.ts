@@ -71,71 +71,70 @@ serve(async (req) => {
             temperature: analysisConfig.temperature,
             messages: [
               {
-                role: 'system',
+                role: "user",
                 content: `You are a senior financial analyst with 20+ years of experience. 
-                
-                CRITICAL CONSISTENCY REQUIREMENTS:
-                - Use IDENTICAL analysis methodology for same companies
-                - Temperature: ${analysisConfig.temperature} (maximum consistency)
-                - Seed: ${analysisConfig.seed} (deterministic results)
-                - Return ONLY valid JSON in exact format specified
-                - Use actual 10-K filing data, never estimates
-                - Apply same fiscal year across all companies for consistency`
-              },
-              {
-                role: 'user',
-                content: isQuickMode ? 
-                  `REAL FINANCIAL ANALYSIS - QUICK MODE
-                  
-                  Companies to analyze: ${companies.join(', ')}
-                  Analysis Seed: ${analysisConfig.seed}
-                  
-                  CRITICAL REQUIREMENTS:
-                  1. Use REAL financial data from latest SEC filings (10-K, 10-Q)
-                  2. Get CORRECT ticker symbols (e.g., Apple = AAPL, Microsoft = MSFT)
-                  3. Calculate actual ratios from real financial statements
-                  4. Use consistent methodology for deterministic results
-                  5. Return RAW JSON ONLY (no markdown, no backticks, no code blocks)
-                  
-                  For each company:
-                  - Find correct NYSE/NASDAQ ticker symbol
-                  - Get latest financial data from SEC EDGAR or reliable financial APIs
-                  - Calculate real debt-to-equity, current ratio, ROE from actual numbers
-                  - Provide accurate risk assessment based on real metrics
-                  
-                  EXACT JSON FORMAT (return ONLY this, no extra text):
-                  {
-                    "companies": [
-                      {
-                        "name": "Exact Company Name",
-                        "ticker": "CORRECT_TICKER",
-                        "analysis": {
-                          "riskScore": REAL_NUMBER_0_TO_100,
-                          "riskLevel": "Low|Medium|High",
-                          "keyMetrics": {
-                            "debtToEquity": REAL_CALCULATED_RATIO,
-                            "currentRatio": REAL_CALCULATED_RATIO,
-                            "roe": REAL_CALCULATED_PERCENTAGE_AS_DECIMAL
-                          },
-                          "recommendation": "Buy|Hold|Sell",
-                          "confidence": CONFIDENCE_0_TO_100,
-                          "dataSource": "SEC Filing Date or Data Source",
-                          "analysisId": "real-${analysisConfig.seed}"
-                        }
-                      }
-                    ],
-                    "portfolioSummary": {
-                      "averageRisk": CALCULATED_AVERAGE,
-                      "recommendation": "Detailed recommendation based on real analysis",
-                      "consistency": "real-financial-data"
-                    }
-                  }` :
-                  `REAL FINANCIAL ANALYSIS - DETAILED MODE
-                  
-                  Companies: ${companies.join(', ')}
-                  Analysis Seed: ${analysisConfig.seed}
-                  
-                  [Enhanced detailed analysis with real financial data - same requirements as quick mode but with comprehensive analysis]`
+
+CRITICAL CONSISTENCY REQUIREMENTS:
+- Use IDENTICAL analysis methodology for same companies
+- Temperature: ${analysisConfig.temperature} (maximum consistency)
+- Seed: ${analysisConfig.seed} (deterministic results)
+- Return ONLY valid JSON in exact format specified
+- Use actual 10-K filing data, never estimates
+- Apply same fiscal year across all companies for consistency
+
+${isQuickMode ? 
+  `REAL FINANCIAL ANALYSIS - QUICK MODE
+  
+  Companies to analyze: ${companies.join(', ')}
+  Analysis Seed: ${analysisConfig.seed}
+  
+  CRITICAL REQUIREMENTS:
+  1. Use REAL financial data from latest SEC filings (10-K, 10-Q)
+  2. Get CORRECT ticker symbols (e.g., Apple = AAPL, Microsoft = MSFT)
+  3. Calculate actual ratios from real financial statements
+  4. Use consistent methodology for deterministic results
+  5. Return RAW JSON ONLY (no markdown, no backticks, no code blocks)
+  
+  For each company:
+  - Find correct NYSE/NASDAQ ticker symbol
+  - Get latest financial data from SEC EDGAR or reliable financial APIs
+  - Calculate real debt-to-equity, current ratio, ROE from actual numbers
+  - Provide accurate risk assessment based on real metrics
+  
+  EXACT JSON FORMAT (return ONLY this, no extra text):
+  {
+    "companies": [
+      {
+        "name": "Exact Company Name",
+        "ticker": "CORRECT_TICKER",
+        "analysis": {
+          "riskScore": REAL_NUMBER_0_TO_100,
+          "riskLevel": "Low|Medium|High",
+          "keyMetrics": {
+            "debtToEquity": REAL_CALCULATED_RATIO,
+            "currentRatio": REAL_CALCULATED_RATIO,
+            "roe": REAL_CALCULATED_PERCENTAGE_AS_DECIMAL
+          },
+          "recommendation": "Buy|Hold|Sell",
+          "confidence": CONFIDENCE_0_TO_100,
+          "dataSource": "SEC Filing Date or Data Source",
+          "analysisId": "real-${analysisConfig.seed}"
+        }
+      }
+    ],
+    "portfolioSummary": {
+      "averageRisk": CALCULATED_AVERAGE,
+      "recommendation": "Detailed recommendation based on real analysis",
+      "consistency": "real-financial-data"
+    }
+  }` :
+  `REAL FINANCIAL ANALYSIS - DETAILED MODE
+  
+  Companies: ${companies.join(', ')}
+  Analysis Seed: ${analysisConfig.seed}
+  
+  [Enhanced detailed analysis with real financial data - same requirements as quick mode but with comprehensive analysis]`
+}`
               }
             ]
           })
@@ -194,7 +193,7 @@ serve(async (req) => {
             }
           }
         } else {
-          throw new Error('Invalid OpenAI response structure');
+          throw new Error('Invalid Claude response structure');
         }
         
       } catch (error) {

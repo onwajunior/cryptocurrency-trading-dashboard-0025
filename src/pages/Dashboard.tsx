@@ -12,7 +12,6 @@ import AnalysisResults from "@/components/AnalysisResults";
 import BatchAnalysisResults from "@/components/BatchAnalysisResults";
 import { generatePDF } from "@/lib/pdfGenerator";
 import { enhancedAnalysis, generateConsistentId, formatConsistencyReport } from '@/lib/enhancedAnalysis';
-import { toast } from "sonner";
 
 import React from "react";
 
@@ -191,8 +190,9 @@ const Dashboard = () => {
         setAnalysisConsistency(cachedResult.consistency);
         setConsistencyScore(98); // High score for cached results
         
-        toast.success('Analysis retrieved from cache for maximum consistency!', {
-          description: formatConsistencyReport(cachedResult.consistency)
+        toast({
+          title: "Analysis Retrieved from Cache",
+          description: `Maximum consistency achieved! ${formatConsistencyReport(cachedResult.consistency)}`,
         });
         
         setCurrentStep('results');
@@ -301,8 +301,9 @@ const Dashboard = () => {
           })
           .eq('id', assessment.id);
 
-        toast.success('Enhanced analysis completed!', {
-          description: `Consistency Score: ${score}/100 | Seed: ${analysisSeed}`
+        toast({
+          title: "Enhanced Analysis Completed!",
+          description: `Consistency Score: ${score}/100 | Seed: ${analysisSeed}`,
         });
 
         setCurrentStep('results');
@@ -314,8 +315,10 @@ const Dashboard = () => {
       enhancedAnalysis.recordFailure();
       console.error('Enhanced analysis error:', error);
       
-      toast.error('Analysis failed', {
-        description: error instanceof Error ? error.message : 'Unknown error occurred'
+      toast({
+        title: "Analysis Failed",
+        description: error instanceof Error ? error.message : 'Unknown error occurred',
+        variant: "destructive",
       });
       
       setCurrentStep('confirm');
@@ -582,7 +585,6 @@ const Dashboard = () => {
                   companies={extractedCompanies}
                   onConfirm={handleConfirmCompanies}
                   onCancel={handleCancelAnalysis}
-                  analysisMode={analysisMode}
                 />
               )}
 
@@ -621,6 +623,8 @@ const Dashboard = () => {
                   results={analysisResults}
                   onSave={handleSaveResults}
                   onDelete={handleDeleteResults}
+                  assessmentId={currentAssessmentId}
+                  onViewDetails={() => {}}
                 />
               )}
             </>

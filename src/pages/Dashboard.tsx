@@ -330,6 +330,7 @@ const Dashboard = () => {
         const score = calculateConsistencyScore(consistencyData);
         setConsistencyScore(score);
 
+        console.log('🔥 About to set analysisResults with:', formattedAnalysisData);
         setAnalysisResults(formattedAnalysisData);
         setAnalysisConsistency(consistencyData);
 

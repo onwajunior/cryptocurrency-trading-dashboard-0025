@@ -153,11 +153,33 @@ const AnalysisResults = ({
       return { label: "High Risk", className: "bg-red-100 text-red-800 hover:bg-red-200" };
     }
   };
+  // Add comprehensive debugging
+  console.log('🔥 AnalysisResults received results:', results);
+  console.log('🔥 AnalysisResults results.companies:', results?.companies);
+  console.log('🔥 AnalysisResults typeof results:', typeof results);
+  console.log('🔥 AnalysisResults Object.keys(results):', Object.keys(results || {}));
+
+  if (!results) {
+    console.log('🚨 AnalysisResults: results is null/undefined');
+    return <Card className="glass-card">
+        <CardContent className="p-6 text-center">
+          <AlertCircle className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
+          <p className="text-muted-foreground">No results data received.</p>
+        </CardContent>
+      </Card>;
+  }
+
   if (!results.companies) {
+    console.log('🚨 AnalysisResults: results.companies is missing');
+    console.log('🚨 Available keys in results:', Object.keys(results));
     return <Card className="glass-card">
         <CardContent className="p-6 text-center">
           <AlertCircle className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
           <p className="text-muted-foreground">No analysis results available.</p>
+          <div className="mt-4 p-4 bg-muted rounded-lg text-left">
+            <p className="text-sm">Debug info:</p>
+            <pre className="text-xs mt-2">{JSON.stringify(results, null, 2)}</pre>
+          </div>
           {results.analysis && <div className="mt-4 p-4 bg-muted rounded-lg text-left">
               <p className="text-sm whitespace-pre-wrap">{results.analysis}</p>
             </div>}

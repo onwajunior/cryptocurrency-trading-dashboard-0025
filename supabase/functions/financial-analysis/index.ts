@@ -36,8 +36,8 @@ serve(async (req) => {
     
     // Enhanced AI Analysis with Maximum Consistency
     const analysisConfig = {
-      temperature: 0.1, // Maximum consistency
-      seed: Math.abs(companies.join('').split('').reduce((a, b) => a + b.charCodeAt(0), 0)), // Deterministic seed
+      temperature: 0.1,
+      seed: Math.abs(companies.join('').split('').reduce((a, b) => a + b.charCodeAt(0), 0)),
       model: 'claude-sonnet-4-20250514',
       max_tokens: maxTokens
     };
@@ -58,6 +58,44 @@ serve(async (req) => {
       console.log(`🔄 Analysis attempt ${attemptCount}/${maxAttempts}`);
       
       try {
+        const prompt = `You are a senior financial analyst. Analyze these companies: ${companies.join(', ')}
+
+CRITICAL: Return ONLY valid JSON in this EXACT format with NO extra text or markdown:
+
+{
+  "companies": [
+    {
+      "name": "Apple Inc.",
+      "ticker": "AAPL",
+      "analysis": {
+        "riskScore": 25,
+        "riskLevel": "Low",
+        "keyMetrics": {
+          "debtToEquity": 1.73,
+          "currentRatio": 1.05,
+          "roe": 0.26
+        },
+        "recommendation": "Buy",
+        "confidence": 90,
+        "dataSource": "SEC 10-K 2023",
+        "analysisId": "real-${analysisConfig.seed}"
+      }
+    }
+  ],
+  "portfolioSummary": {
+    "averageRisk": 25,
+    "recommendation": "Strong portfolio with low risk companies",
+    "consistency": "real-financial-data"
+  }
+}
+
+RULES:
+1. Use correct ticker symbols (Apple=AAPL, Microsoft=MSFT, Tesla=TSLA, Gilead=GILD, etc.)
+2. Use realistic financial ratios based on actual company performance
+3. Return raw JSON only - no backticks, no markdown, no extra text
+4. Include ALL companies in the companies array
+5. Make riskScore 0-100, riskLevel Low/Medium/High, recommendation Buy/Hold/Sell`;
+
         const claudeResponse = await fetch('https://api.anthropic.com/v1/messages', {
           method: 'POST',
           headers: {
@@ -72,69 +110,7 @@ serve(async (req) => {
             messages: [
               {
                 role: "user",
-                content: `You are a senior financial analyst with 20+ years of experience. 
-
-CRITICAL CONSISTENCY REQUIREMENTS:
-- Use IDENTICAL analysis methodology for same companies
-- Temperature: ${analysisConfig.temperature} (maximum consistency)
-- Seed: ${analysisConfig.seed} (deterministic results)
-- Return ONLY valid JSON in exact format specified
-- Use actual 10-K filing data, never estimates
-- Apply same fiscal year across all companies for consistency
-
-${isQuickMode ? 
-  `REAL FINANCIAL ANALYSIS - QUICK MODE
-  
-  Companies to analyze: ${companies.join(', ')}
-  Analysis Seed: ${analysisConfig.seed}
-  
-  CRITICAL REQUIREMENTS:
-  1. Use REAL financial data from latest SEC filings (10-K, 10-Q)
-  2. Get CORRECT ticker symbols (e.g., Apple = AAPL, Microsoft = MSFT)
-  3. Calculate actual ratios from real financial statements
-  4. Use consistent methodology for deterministic results
-  5. Return RAW JSON ONLY (no markdown, no backticks, no code blocks)
-  
-  For each company:
-  - Find correct NYSE/NASDAQ ticker symbol
-  - Get latest financial data from SEC EDGAR or reliable financial APIs
-  - Calculate real debt-to-equity, current ratio, ROE from actual numbers
-  - Provide accurate risk assessment based on real metrics
-  
-  EXACT JSON FORMAT (return ONLY this, no extra text):
-  {
-    "companies": [
-      {
-        "name": "Exact Company Name",
-        "ticker": "CORRECT_TICKER",
-        "analysis": {
-          "riskScore": REAL_NUMBER_0_TO_100,
-          "riskLevel": "Low|Medium|High",
-          "keyMetrics": {
-            "debtToEquity": REAL_CALCULATED_RATIO,
-            "currentRatio": REAL_CALCULATED_RATIO,
-            "roe": REAL_CALCULATED_PERCENTAGE_AS_DECIMAL
-          },
-          "recommendation": "Buy|Hold|Sell",
-          "confidence": CONFIDENCE_0_TO_100,
-          "dataSource": "SEC Filing Date or Data Source",
-          "analysisId": "real-${analysisConfig.seed}"
-        }
-      }
-    ],
-    "portfolioSummary": {
-      "averageRisk": CALCULATED_AVERAGE,
-      "recommendation": "Detailed recommendation based on real analysis",
-      "consistency": "real-financial-data"
-    }
-  }` :
-  `REAL FINANCIAL ANALYSIS - DETAILED MODE
-  
-  Companies: ${companies.join(', ')}
-  Analysis Seed: ${analysisConfig.seed}
-  
-  [Enhanced detailed analysis with real financial data - same requirements as quick mode but with comprehensive analysis]`
-}`
+                content: prompt
               }
             ]
           })
@@ -165,7 +141,7 @@ ${isQuickMode ?
             const parsedResult = JSON.parse(jsonContent);
             
             // Validate required structure
-            if (parsedResult.companies && Array.isArray(parsedResult.companies)) {
+            if (parsedResult.companies && Array.isArray(parsedResult.companies) && parsedResult.companies.length > 0) {
               // Add consistency metadata
               parsedResult.metadata = {
                 analysisId: analysisConfig.seed,
@@ -183,7 +159,7 @@ ${isQuickMode ?
                 attempt: attemptCount
               });
             } else {
-              throw new Error('Invalid analysis structure');
+              throw new Error('Invalid analysis structure - missing companies array');
             }
           } catch (parseError) {
             console.warn(`⚠️ JSON parsing failed on attempt ${attemptCount}:`, parseError);
@@ -200,30 +176,48 @@ ${isQuickMode ?
         console.warn(`⚠️ Analysis attempt ${attemptCount} failed:`, error);
         
         if (attemptCount === maxAttempts) {
-          // Enhanced fallback system (superior to Code 1)
+          // Enhanced fallback system
           console.log('🛡️ Activating enhanced fallback system...');
           
           analysisResult = {
-            companies: companies.map((company, index) => ({
-              name: company,
-              ticker: company.toUpperCase().replace(/[^A-Z]/g, '').substring(0, 4),
-              analysis: {
-                riskScore: 50 + (analysisConfig.seed % 30), // Deterministic fallback
-                riskLevel: "Medium",
-                keyMetrics: {
-                  debtToEquity: 0.5 + (analysisConfig.seed % 100) / 200,
-                  currentRatio: 1.2 + (analysisConfig.seed % 80) / 100,
-                  roe: 0.1 + (analysisConfig.seed % 20) / 100
-                },
-                recommendation: "Hold",
-                confidence: 75,
-                dataSource: "Fallback analysis",
-                analysisId: `fallback-${analysisConfig.seed}`
+            companies: companies.map((company, index) => {
+              // Get proper ticker symbols
+              const tickerMap: Record<string, string> = {
+                'apple': 'AAPL',
+                'microsoft': 'MSFT', 
+                'tesla': 'TSLA',
+                'amazon': 'AMZN',
+                'google': 'GOOGL',
+                'meta': 'META',
+                'netflix': 'NFLX',
+                'nvidia': 'NVDA',
+                'gilead': 'GILD',
+                'pfizer': 'PFE'
+              };
+              
+              const ticker = tickerMap[company.toLowerCase()] || company.toUpperCase().substring(0, 4);
+              
+              return {
+                name: company,
+                ticker: ticker,
+                analysis: {
+                  riskScore: 45 + (analysisConfig.seed % 30), // Deterministic fallback
+                  riskLevel: "Medium",
+                  keyMetrics: {
+                    debtToEquity: 0.5 + (analysisConfig.seed % 100) / 200,
+                    currentRatio: 1.2 + (analysisConfig.seed % 80) / 100,
+                    roe: 0.1 + (analysisConfig.seed % 20) / 100
+                  },
+                  recommendation: "Hold",
+                  confidence: 75,
+                  dataSource: "Fallback analysis - please try again",
+                  analysisId: `fallback-${analysisConfig.seed}`
+                }
               }
-            })),
+            }),
             portfolioSummary: {
               averageRisk: 50,
-              recommendation: "Diversified portfolio approach recommended",
+              recommendation: "Analysis temporarily unavailable - fallback data shown",
               consistency: "deterministic-fallback"
             },
             metadata: {
@@ -255,7 +249,7 @@ ${isQuickMode ?
         temperature: analysisConfig.temperature,
         attempts: attemptCount,
         timestamp: new Date().toISOString(),
-        version: 'enhanced-v2.0'
+        version: 'enhanced-v3.0'
       }
     };
     

@@ -34,10 +34,13 @@ serve(async (req) => {
     const isQuickMode = mode === 'quick';
     const maxTokens = isQuickMode ? 2000 : 4000;
     
-    // Enhanced AI Analysis with Maximum Consistency
+    // Enhanced AI Analysis with Maximum Consistency - Include mode in seed for consistency within mode
+    const baseSeed = Math.abs(companies.join('').split('').reduce((a, b) => a + b.charCodeAt(0), 0));
+    const modeSeed = mode === 'quick' ? baseSeed : baseSeed + 1000; // Different seeds for different modes
+    
     const analysisConfig = {
-      temperature: 0.1, // Maximum consistency (vs Code 1's 0.3)
-      seed: Math.abs(companies.join('').split('').reduce((a, b) => a + b.charCodeAt(0), 0)), // Deterministic seed
+      temperature: 0.1, // Maximum consistency
+      seed: modeSeed, // Mode-specific deterministic seed
       model: 'gpt-4.1-2025-04-14',
       max_tokens: maxTokens,
       top_p: 0.1, // Further reduce randomness
@@ -130,12 +133,76 @@ serve(async (req) => {
                       "consistency": "real-financial-data"
                     }
                   }` :
-                  `REAL FINANCIAL ANALYSIS - DETAILED MODE
-                  
-                  Companies: ${companies.join(', ')}
-                  Analysis Seed: ${analysisConfig.seed}
-                  
-                  [Enhanced detailed analysis with real financial data - same requirements as quick mode but with comprehensive analysis]`
+                   `REAL FINANCIAL ANALYSIS - DETAILED MODE
+                   
+                   Companies to analyze: ${companies.join(', ')}
+                   Analysis Seed: ${analysisConfig.seed}
+                   
+                   CRITICAL REQUIREMENTS:
+                   1. Use REAL financial data from latest SEC filings (10-K, 10-Q)
+                   2. Get CORRECT ticker symbols (e.g., Apple = AAPL, Microsoft = MSFT)
+                   3. Calculate actual ratios from real financial statements
+                   4. Use consistent methodology for deterministic results
+                   5. Return RAW JSON ONLY (no markdown, no backticks, no code blocks)
+                   
+                   For each company provide COMPREHENSIVE analysis including:
+                   - Complete financial health assessment
+                   - Detailed ratio analysis (liquidity, profitability, efficiency, leverage)
+                   - Industry comparison and competitive position
+                   - Risk factors and opportunities
+                   - Investment thesis and outlook
+                   
+                   EXACT JSON FORMAT (return ONLY this, no extra text):
+                   {
+                     "companies": [
+                       {
+                         "name": "Exact Company Name",
+                         "ticker": "CORRECT_TICKER",
+                         "liquidity_ratios": {
+                           "current_ratio": REAL_CALCULATED_RATIO,
+                           "quick_ratio": REAL_CALCULATED_RATIO,
+                           "cash_ratio": REAL_CALCULATED_RATIO
+                         },
+                         "solvency_ratios": {
+                           "debt_to_equity": REAL_CALCULATED_RATIO,
+                           "debt_to_assets": REAL_CALCULATED_RATIO,
+                           "interest_coverage": REAL_CALCULATED_RATIO
+                         },
+                         "profitability_ratios": {
+                           "roe": REAL_CALCULATED_PERCENTAGE_AS_DECIMAL,
+                           "roa": REAL_CALCULATED_PERCENTAGE_AS_DECIMAL,
+                           "profit_margin": REAL_CALCULATED_PERCENTAGE_AS_DECIMAL
+                         },
+                         "efficiency_ratios": {
+                           "asset_turnover": REAL_CALCULATED_RATIO,
+                           "inventory_turnover": REAL_CALCULATED_RATIO
+                         },
+                         "overall_rating": "Low|Medium|High",
+                         "altman_z_score": {
+                           "score": REAL_CALCULATED_SCORE,
+                           "zone": "Distress|Grey|Safe"
+                         },
+                         "analysis": {
+                           "strengths": ["Detailed strength 1", "Detailed strength 2"],
+                           "weaknesses": ["Detailed weakness 1", "Detailed weakness 2"],
+                           "opportunities": ["Market opportunity 1", "Growth opportunity 2"],
+                           "threats": ["Risk factor 1", "Industry threat 2"]
+                         },
+                         "recommendation": {
+                           "action": "Buy|Hold|Sell",
+                           "price_target": REAL_PRICE_IF_AVAILABLE,
+                           "time_horizon": "Short|Medium|Long",
+                           "confidence": CONFIDENCE_0_TO_100
+                         }
+                       }
+                     ],
+                     "portfolioSummary": {
+                       "averageRisk": CALCULATED_AVERAGE,
+                       "diversificationScore": SCORE_0_TO_100,
+                       "recommendation": "Comprehensive portfolio recommendation with detailed reasoning",
+                       "consistency": "real-comprehensive-data"
+                     }
+                   }`
               }
             ]
           })

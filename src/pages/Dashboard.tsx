@@ -185,6 +185,8 @@ const Dashboard = () => {
       // Check for cached analysis first
       const cachedResult = enhancedAnalysis.getCachedAnalysis(confirmedCompanies, analysisMode);
       if (cachedResult) {
+        console.log('🎯 Cached result structure:', cachedResult);
+        console.log('🎯 Cached data structure:', cachedResult.data);
         setCacheStatus('hit');
         setAnalysisResults(cachedResult.data);
         setAnalysisConsistency(cachedResult.consistency);

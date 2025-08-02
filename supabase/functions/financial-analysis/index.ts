@@ -21,28 +21,25 @@ serve(async (req) => {
     }
     
     // Check environment variables
-    const openaiKey = Deno.env.get('OPENAI_API_KEY');
-    console.log('OpenAI API key exists:', !!openaiKey);
+    const anthropicKey = Deno.env.get('ANTHROPIC_API_KEY');
+    console.log('Anthropic API key exists:', !!anthropicKey);
     
-    if (!openaiKey) {
-      throw new Error('OpenAI API key not configured');
+    if (!anthropicKey) {
+      throw new Error('Anthropic API key not configured');
     }
 
-    // Now try OpenAI API call
-    console.log('Calling OpenAI API... Mode:', mode);
+    // Now try Claude API call
+    console.log('Calling Claude API... Mode:', mode);
     
     const isQuickMode = mode === 'quick';
     const maxTokens = isQuickMode ? 2000 : 4000;
     
     // Enhanced AI Analysis with Maximum Consistency
     const analysisConfig = {
-      temperature: 0.1, // Maximum consistency (vs Code 1's 0.3)
+      temperature: 0.1, // Maximum consistency
       seed: Math.abs(companies.join('').split('').reduce((a, b) => a + b.charCodeAt(0), 0)), // Deterministic seed
-      model: 'gpt-4.1-2025-04-14',
-      max_tokens: maxTokens,
-      top_p: 0.1, // Further reduce randomness
-      frequency_penalty: 0,
-      presence_penalty: 0
+      model: 'claude-sonnet-4-20250514',
+      max_tokens: maxTokens
     };
     
     console.log('🎯 Enhanced Analysis Config:', { 
@@ -61,14 +58,17 @@ serve(async (req) => {
       console.log(`🔄 Analysis attempt ${attemptCount}/${maxAttempts}`);
       
       try {
-        const openaiResponse = await fetch('https://api.openai.com/v1/chat/completions', {
+        const claudeResponse = await fetch('https://api.anthropic.com/v1/messages', {
           method: 'POST',
           headers: {
-            'Authorization': `Bearer ${openaiKey}`,
-            'Content-Type': 'application/json'
+            'Authorization': `Bearer ${anthropicKey}`,
+            'Content-Type': 'application/json',
+            'anthropic-version': '2023-06-01'
           },
           body: JSON.stringify({
-            ...analysisConfig,
+            model: analysisConfig.model,
+            max_tokens: analysisConfig.max_tokens,
+            temperature: analysisConfig.temperature,
             messages: [
               {
                 role: 'system',
@@ -141,14 +141,14 @@ serve(async (req) => {
           })
         });
     
-        if (!openaiResponse.ok) {
-          throw new Error(`OpenAI API error: ${openaiResponse.status}`);
+        if (!claudeResponse.ok) {
+          throw new Error(`Claude API error: ${claudeResponse.status}`);
         }
     
-        const openaiData = await openaiResponse.json();
+        const claudeData = await claudeResponse.json();
         
-        if (openaiData.choices && openaiData.choices[0] && openaiData.choices[0].message) {
-          const content = openaiData.choices[0].message.content;
+        if (claudeData.content && claudeData.content[0] && claudeData.content[0].text) {
+          const content = claudeData.content[0].text;
           
           // Enhanced JSON parsing - handle markdown-wrapped responses
           try {

@@ -291,11 +291,11 @@ const Dashboard = () => {
         setAnalysisResults(analysisData);
         setAnalysisConsistency(consistencyData);
 
-        // Update assessment status
         await supabase
           .from('assessments')
           .update({ 
             status: 'completed',
+            results: analysisData,
             consistency_score: score,
             analysis_metadata: consistencyData
           })

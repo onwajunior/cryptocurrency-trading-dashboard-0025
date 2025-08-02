@@ -21,6 +21,7 @@ export type Database = {
           analysis_seed: number | null
           companies: string[]
           consistency_level: string | null
+          consistency_score: number | null
           created_at: string
           id: string
           name: string
@@ -35,6 +36,7 @@ export type Database = {
           analysis_seed?: number | null
           companies: string[]
           consistency_level?: string | null
+          consistency_score?: number | null
           created_at?: string
           id?: string
           name: string
@@ -49,6 +51,7 @@ export type Database = {
           analysis_seed?: number | null
           companies?: string[]
           consistency_level?: string | null
+          consistency_score?: number | null
           created_at?: string
           id?: string
           name?: string

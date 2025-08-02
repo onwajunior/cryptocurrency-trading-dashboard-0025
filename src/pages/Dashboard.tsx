@@ -16,6 +16,70 @@ import { toast } from "sonner";
 
 import React from "react";
 
+// Enhanced Consistency Indicator Component
+const ConsistencyIndicator = ({ consistency, score, cacheStatus }: {
+  consistency: any;
+  score: number;
+  cacheStatus: 'none' | 'hit' | 'miss';
+}) => {
+  if (!consistency) return null;
+
+  const getScoreColor = (score: number) => {
+    if (score >= 95) return 'text-green-600';
+    if (score >= 85) return 'text-yellow-600';
+    return 'text-red-600';
+  };
+
+  const getCacheIcon = (status: string) => {
+    switch (status) {
+      case 'hit': return '🎯';
+      case 'miss': return '🔄';
+      default: return '📊';
+    }
+  };
+
+  return (
+    <div className="bg-gradient-to-r from-blue-50 to-purple-50 p-4 rounded-lg border border-blue-200 mb-6">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-2">
+            <span className="text-2xl">{getCacheIcon(cacheStatus)}</span>
+            <div>
+              <h3 className="font-semibold text-gray-800">Enhanced Consistency</h3>
+              <p className="text-sm text-gray-600">
+                {cacheStatus === 'hit' ? 'Cached Result' : 'Fresh Analysis'}
+              </p>
+            </div>
+          </div>
+          
+          <div className="border-l border-gray-300 pl-4">
+            <div className="flex items-center space-x-2">
+              <span className={`text-2xl font-bold ${getScoreColor(score)}`}>
+                {score}/100
+              </span>
+              <div>
+                <p className="text-sm font-medium text-gray-700">Consistency Score</p>
+                <p className="text-xs text-gray-500">
+                  Seed: {consistency.seed} | Temp: {consistency.temperature}
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div className="text-right">
+          <p className="text-sm font-medium text-gray-700">
+            Attempts: {consistency.attempts}
+          </p>
+          <p className="text-xs text-gray-500">
+            {new Date(consistency.timestamp).toLocaleTimeString()}
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const Dashboard = () => {
   const [activeTab, setActiveTab] = useState("assessment");
   const [companies, setCompanies] = useState("");
@@ -28,6 +92,7 @@ const Dashboard = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [analysisMode, setAnalysisMode] = useState<'quick' | 'detailed'>('quick');
   const { toast } = useToast();
+  
   // Enhanced state for consistency tracking
   const [analysisConsistency, setAnalysisConsistency] = useState<any>(null);
   const [cacheStatus, setCacheStatus] = useState<'none' | 'hit' | 'miss'>('none');
@@ -117,7 +182,7 @@ const Dashboard = () => {
         companies: confirmedCompanies,
         timestamp: new Date().toISOString()
       });
-  
+
       // Check for cached analysis first
       const cachedResult = enhancedAnalysis.getCachedAnalysis(confirmedCompanies, analysisMode);
       if (cachedResult) {
@@ -133,34 +198,34 @@ const Dashboard = () => {
         setCurrentStep('results');
         return;
       }
-  
+
       setCacheStatus('miss');
-  
+
       // Get current user
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
         throw new Error('User not authenticated');
       }
-  
+
       // Check current assessment count and delete oldest if necessary
       const { data: existingAssessments, error: countError } = await supabase
         .from('assessments')
         .select('id, created_at')
         .eq('user_id', user.id)
         .order('created_at', { ascending: true });
-  
+
       if (countError) throw countError;
-  
+
       // If we have 5 or more assessments, delete the oldest
       if (existingAssessments && existingAssessments.length >= 5) {
         const { error: deleteError } = await supabase
           .from('assessments')
           .delete()
           .eq('id', existingAssessments[0].id);
-  
+
         if (deleteError) throw deleteError;
       }
-  
+
       // Generate deterministic seed for consistency
       const analysisSeed = enhancedAnalysis.generateSeed(confirmedCompanies);
       
@@ -178,16 +243,16 @@ const Dashboard = () => {
         })
         .select()
         .single();
-  
+
       if (error) throw error;
-  
+
       setCurrentAssessmentId(assessment.id);
-  
+
       // Enhanced analysis with circuit breaker
       if (enhancedAnalysis.isCircuitOpen()) {
         throw new Error('Service temporarily unavailable. Please try again in a few minutes.');
       }
-  
+
       // Call the enhanced financial analysis function
       const response = await enhancedAnalysis.withRetry(async () => {
         const result = await supabase.functions.invoke('financial-analysis', {
@@ -199,33 +264,33 @@ const Dashboard = () => {
             consistencyLevel: 'maximum'
           }
         });
-  
+
         if (result.error) {
           throw new Error(result.error.message || 'Analysis failed');
         }
-  
+
         return result;
       });
-  
+
       enhancedAnalysis.recordSuccess();
-  
+
       if (response.data?.success && response.data?.data) {
         const analysisData = response.data.data;
         const consistencyData = response.data.consistency;
-  
+
         // Cache the results for future consistency
         enhancedAnalysis.setCachedAnalysis(confirmedCompanies, analysisMode, {
           data: analysisData,
           consistency: consistencyData
         });
-  
+
         // Calculate consistency score
         const score = calculateConsistencyScore(consistencyData);
         setConsistencyScore(score);
-  
+
         setAnalysisResults(analysisData);
         setAnalysisConsistency(consistencyData);
-  
+
         // Update assessment status
         await supabase
           .from('assessments')
@@ -235,16 +300,16 @@ const Dashboard = () => {
             analysis_metadata: consistencyData
           })
           .eq('id', assessment.id);
-  
+
         toast.success('Enhanced analysis completed!', {
           description: `Consistency Score: ${score}/100 | Seed: ${analysisSeed}`
         });
-  
+
         setCurrentStep('results');
       } else {
         throw new Error('Invalid response from analysis service');
       }
-  
+
     } catch (error) {
       enhancedAnalysis.recordFailure();
       console.error('Enhanced analysis error:', error);
@@ -256,7 +321,7 @@ const Dashboard = () => {
       setCurrentStep('confirm');
     }
   };
-  
+
   // Helper function to calculate consistency score
   const calculateConsistencyScore = (consistency: any): number => {
     let score = 100;
@@ -468,41 +533,45 @@ const Dashboard = () => {
                     <div className="space-y-4">
                       <h3 className="text-lg font-medium">Analysis Mode</h3>
                       <div className="grid grid-cols-2 gap-4">
-                        <div 
-                          onClick={() => setAnalysisMode('quick')}
-                          className={`p-4 border rounded-lg cursor-pointer transition-colors ${
+                        <Card 
+                          className={`cursor-pointer transition-all ${
                             analysisMode === 'quick' 
-                              ? 'border-primary bg-primary/10' 
-                              : 'border-border hover:border-primary/50'
+                              ? 'ring-2 ring-primary bg-primary/5' 
+                              : 'hover:bg-muted/50'
                           }`}
+                          onClick={() => setAnalysisMode('quick')}
                         >
-                          <h4 className="font-medium mb-2">Quick Analysis</h4>
-                          <p className="text-sm text-muted-foreground">
-                            Essential metrics only - Z-score, key ratios, risk level. Best for multiple companies.
-                          </p>
-                        </div>
-                        <div 
-                          onClick={() => setAnalysisMode('detailed')}
-                          className={`p-4 border rounded-lg cursor-pointer transition-colors ${
+                          <CardContent className="p-4">
+                            <h4 className="font-medium mb-2">Quick Analysis</h4>
+                            <p className="text-sm text-muted-foreground">
+                              Fast overview of key financial metrics and risk indicators
+                            </p>
+                          </CardContent>
+                        </Card>
+                        <Card 
+                          className={`cursor-pointer transition-all ${
                             analysisMode === 'detailed' 
-                              ? 'border-primary bg-primary/10' 
-                              : 'border-border hover:border-primary/50'
+                              ? 'ring-2 ring-primary bg-primary/5' 
+                              : 'hover:bg-muted/50'
                           }`}
+                          onClick={() => setAnalysisMode('detailed')}
                         >
-                          <h4 className="font-medium mb-2">Detailed Analysis</h4>
-                          <p className="text-sm text-muted-foreground">
-                            Comprehensive analysis with full breakdown, timeline, and recommendations. Best for single company.
-                          </p>
-                        </div>
+                          <CardContent className="p-4">
+                            <h4 className="font-medium mb-2">Detailed Analysis</h4>
+                            <p className="text-sm text-muted-foreground">
+                              Comprehensive analysis with in-depth insights and recommendations
+                            </p>
+                          </CardContent>
+                        </Card>
                       </div>
                     </div>
 
                     <Button 
                       onClick={handleAnalyze} 
-                      className="w-full bg-gradient-primary"
+                      className="w-full"
                       disabled={!companies.trim() && !uploadedFile}
                     >
-                      Start {analysisMode === 'quick' ? 'Quick' : 'Detailed'} Analysis
+                      Start Analysis
                     </Button>
                   </CardContent>
                 </Card>
@@ -513,59 +582,45 @@ const Dashboard = () => {
                   companies={extractedCompanies}
                   onConfirm={handleConfirmCompanies}
                   onCancel={handleCancelAnalysis}
+                  analysisMode={analysisMode}
                 />
               )}
 
               {currentStep === 'analyzing' && (
                 <Card className="glass-card">
-                  <CardContent className="p-12 text-center">
-                    <Loader2 className="h-12 w-12 mx-auto mb-4 animate-spin text-primary" />
+                  <CardContent className="flex flex-col items-center justify-center py-12">
+                    <Loader2 className="h-12 w-12 animate-spin text-primary mb-4" />
                     <h3 className="text-lg font-medium mb-2">Analyzing Companies</h3>
-                    <p className="text-sm text-muted-foreground">
-                      Please wait while we perform comprehensive financial risk analysis...
+                    <p className="text-muted-foreground text-center">
+                      Our AI is performing {analysisMode} analysis on your selected companies. 
+                      This may take a few moments...
                     </p>
                   </CardContent>
                 </Card>
               )}
 
-              {currentStep === 'results' && analysisResults && currentAssessmentId && (
-                <AnalysisResults
-                  results={analysisResults}
-                  assessmentId={currentAssessmentId}
-                  assessmentName={assessments.find(a => a.id === currentAssessmentId)?.name || `Risk Assessment - ${new Date().toLocaleDateString()}`}
-                  onSave={handleSaveResults}
-                  onDelete={handleDeleteResults}
-                />
+              {currentStep === 'results' && analysisResults && (
+                <div className="space-y-6">
+                  <ConsistencyIndicator 
+                    consistency={analysisConsistency}
+                    score={consistencyScore}
+                    cacheStatus={cacheStatus}
+                  />
+                  
+                  <AnalysisResults
+                    results={analysisResults}
+                    onSave={handleSaveResults}
+                    onDelete={handleDeleteResults}
+                    assessmentId={currentAssessmentId}
+                  />
+                </div>
               )}
 
-              {currentStep === 'batch-results' && analysisResults && currentAssessmentId && (
+              {currentStep === 'batch-results' && analysisResults && (
                 <BatchAnalysisResults
                   results={analysisResults}
-                  assessmentId={currentAssessmentId}
-                  assessmentName={assessments.find(a => a.id === currentAssessmentId)?.name || `Risk Assessment - ${new Date().toLocaleDateString()}`}
                   onSave={handleSaveResults}
                   onDelete={handleDeleteResults}
-                  onViewDetails={(companyName) => {
-                    // Find the company data from existing batch results
-                    const companyData = analysisResults?.companies?.find(
-                      (company: any) => company.name.toLowerCase() === companyName.toLowerCase()
-                    );
-                    
-                    if (companyData) {
-                      // Use existing data to show detailed view
-                      setAnalysisResults({
-                        ...analysisResults,
-                        companies: [companyData]
-                      });
-                      setCurrentStep('results');
-                    } else {
-                      // Fallback: trigger new detailed analysis if company not found
-                      setAnalysisMode('detailed');
-                      setCompanies(companyName);
-                      setCurrentStep('analyzing');
-                      handleConfirmCompanies([companyName]);
-                    }
-                  }}
                 />
               )}
             </>
@@ -577,81 +632,64 @@ const Dashboard = () => {
                 <CardTitle className="gradient-text">Assessment Library</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="space-y-4">
-                  {assessments.length === 0 ? (
-                    <div className="text-center py-8 text-muted-foreground">
-                      <FileText className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                      <p>No assessments found. Create your first risk assessment to get started.</p>
-                    </div>
-                  ) : (
-                    assessments.map((assessment) => (
-                      <Card key={assessment.id} className="card-hover">
+                {assessments.length === 0 ? (
+                  <div className="text-center py-12">
+                    <History className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
+                    <h3 className="text-lg font-medium mb-2">No Assessments Yet</h3>
+                    <p className="text-muted-foreground">
+                      Your completed assessments will appear here
+                    </p>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {assessments.map((assessment) => (
+                      <Card key={assessment.id} className="border">
                         <CardContent className="p-4">
-                          <div className="flex justify-between items-start">
+                          <div className="flex items-center justify-between">
                             <div className="flex-1">
-                              <h4 className="font-medium mb-1">{assessment.name}</h4>
-                              <p className="text-sm text-muted-foreground mb-2">
+                              <h4 className="font-medium">{assessment.name}</h4>
+                              <p className="text-sm text-muted-foreground">
+                                {assessment.companies?.length || 0} companies • {' '}
                                 {new Date(assessment.created_at).toLocaleDateString()}
                               </p>
-                              <p className="text-xs text-muted-foreground">
-                                Companies: {assessment.companies.join(", ")}
-                              </p>
+                              <div className="flex items-center gap-2 mt-2">
+                                <span className={`px-2 py-1 rounded-full text-xs ${
+                                  assessment.status === 'completed' 
+                                    ? 'bg-green-100 text-green-800' 
+                                    : 'bg-yellow-100 text-yellow-800'
+                                }`}>
+                                  {assessment.status}
+                                </span>
+                                {assessment.consistency_score && (
+                                  <span className="px-2 py-1 rounded-full text-xs bg-blue-100 text-blue-800">
+                                    Consistency: {assessment.consistency_score}/100
+                                  </span>
+                                )}
+                              </div>
                             </div>
-                            <div className="flex flex-col items-end gap-2">
-                              <span className={`text-xs px-2 py-1 rounded-full ${
-                                assessment.status === "completed" 
-                                  ? "bg-green-500/20 text-green-400" 
-                                  : assessment.status === "processing"
-                                  ? "bg-blue-500/20 text-blue-400"
-                                  : assessment.status === "failed"
-                                  ? "bg-red-500/20 text-red-400"
-                                  : "bg-yellow-500/20 text-yellow-400"
-                              }`}>
-                                {assessment.status.charAt(0).toUpperCase() + assessment.status.slice(1)}
-                              </span>
-                              {assessment.status === "completed" && (
-                                <div className="flex gap-1">
-                                  <Button 
-                                    variant="outline" 
-                                    size="sm"
-                                    onClick={() => {
-                                      setAnalysisResults(assessment.results);
-                                      setCurrentAssessmentId(assessment.id);
-                                      setCurrentStep('results');
-                                      setActiveTab('assessment');
-                                    }}
-                                    className="flex items-center gap-1"
-                                  >
-                                    <Eye className="h-3 w-3" />
-                                    View
-                                  </Button>
-                                  <Button 
-                                    variant="outline" 
-                                    size="sm"
-                                    onClick={() => handleDownloadAssessment(assessment)}
-                                    className="flex items-center gap-1"
-                                  >
-                                    <Download className="h-3 w-3" />
-                                    Download
-                                  </Button>
-                                  <Button 
-                                    variant="outline" 
-                                    size="sm"
-                                    onClick={() => handleDeleteAssessment(assessment.id)}
-                                    className="flex items-center gap-1 text-destructive hover:bg-destructive/10"
-                                  >
-                                    <Trash2 className="h-3 w-3" />
-                                    Delete
-                                  </Button>
-                                </div>
-                              )}
+                            <div className="flex items-center gap-2">
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => handleDownloadAssessment(assessment)}
+                                disabled={!assessment.results}
+                              >
+                                <Download className="h-4 w-4" />
+                              </Button>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => handleDeleteAssessment(assessment.id)}
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
                             </div>
                           </div>
                         </CardContent>
                       </Card>
-                    ))
-                  )}
-                </div>
+                    ))}
+                  </div>
+                )}
               </CardContent>
             </Card>
           )}

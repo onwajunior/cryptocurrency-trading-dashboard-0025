@@ -192,19 +192,26 @@ const Dashboard = () => {
         let analysisData;
         if (cachedResult.data?.companies) {
           // Direct cache structure
-          analysisData = cachedResult.data;
+          analysisData = {
+            ...cachedResult.data,
+            analysis_date: new Date().toLocaleDateString(),
+          };
         } else if (cachedResult.data?.results?.companies) {
           // Nested results structure
-          analysisData = cachedResult.data.results;
+          analysisData = {
+            ...cachedResult.data.results,
+            analysis_date: new Date().toLocaleDateString(),
+          };
         } else {
           console.warn('⚠️ Cached data does not contain companies array');
           setCacheStatus('invalid');
           // Continue to fresh analysis
         }
         
-        if (analysisData?.companies) {
+        if (analysisData?.companies && analysisData.companies.length > 0) {
           console.log('🎯 Final analysis data for component:', analysisData);
           console.log('🎯 Companies count:', analysisData.companies.length);
+          console.log('🎯 First company data:', analysisData.companies[0]);
           
           setCacheStatus('hit');
           setAnalysisResults(analysisData);
@@ -304,9 +311,17 @@ const Dashboard = () => {
         console.log('🔥 Analysis data structure:', analysisData);
         console.log('🔥 Analysis data companies:', analysisData?.companies);
 
+        // Ensure the data has the required format for AnalysisResults component
+        const formattedAnalysisData = {
+          ...analysisData,
+          analysis_date: new Date().toLocaleDateString(),
+        };
+
+        console.log('🔥 Formatted analysis data:', formattedAnalysisData);
+
         // Cache the results for future consistency - store the actual analysisData 
         enhancedAnalysis.setCachedAnalysis(confirmedCompanies, analysisMode, {
-          data: analysisData,  // Store the results directly, not nested
+          data: formattedAnalysisData,  // Store the results directly, not nested
           consistency: consistencyData,
           timestamp: new Date().toISOString()
         });
@@ -315,7 +330,7 @@ const Dashboard = () => {
         const score = calculateConsistencyScore(consistencyData);
         setConsistencyScore(score);
 
-        setAnalysisResults(analysisData);
+        setAnalysisResults(formattedAnalysisData);
         setAnalysisConsistency(consistencyData);
 
         await supabase

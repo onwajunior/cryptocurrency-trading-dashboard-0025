@@ -274,8 +274,8 @@ const Dashboard = () => {
 
       enhancedAnalysis.recordSuccess();
 
-      if (response.data?.success && response.data?.data) {
-        const analysisData = response.data.data;
+      if (response.data?.success && response.data?.results) {
+        const analysisData = response.data.results;
         const consistencyData = response.data.consistency;
 
         // Cache the results for future consistency

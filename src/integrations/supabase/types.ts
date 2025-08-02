@@ -16,7 +16,11 @@ export type Database = {
     Tables: {
       assessments: {
         Row: {
+          analysis_metadata: Json | null
+          analysis_mode: string | null
+          analysis_seed: number | null
           companies: string[]
+          consistency_level: string | null
           created_at: string
           id: string
           name: string
@@ -26,7 +30,11 @@ export type Database = {
           user_id: string | null
         }
         Insert: {
+          analysis_metadata?: Json | null
+          analysis_mode?: string | null
+          analysis_seed?: number | null
           companies: string[]
+          consistency_level?: string | null
           created_at?: string
           id?: string
           name: string
@@ -36,7 +44,11 @@ export type Database = {
           user_id?: string | null
         }
         Update: {
+          analysis_metadata?: Json | null
+          analysis_mode?: string | null
+          analysis_seed?: number | null
           companies?: string[]
+          consistency_level?: string | null
           created_at?: string
           id?: string
           name?: string

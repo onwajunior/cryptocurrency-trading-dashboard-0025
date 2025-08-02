@@ -227,61 +227,12 @@ serve(async (req) => {
           await new Promise(resolve => setTimeout(resolve, 1000 * attemptCount));
         }
       }
-    };
-
-    console.log('OpenAI response status:', openaiResponse.status);
-
-    let structuredResults = null;
-    let analysisText = '';
-    
-    if (openaiResponse.ok) {
-      const openaiData = await openaiResponse.json();
-      analysisText = openaiData.choices[0].message.content;
-      console.log('OpenAI response received successfully');
-      
-      // Try to parse the JSON response
-      try {
-        structuredResults = JSON.parse(analysisText);
-        console.log('Successfully parsed structured data');
-      } catch (parseError) {
-        console.error('Failed to parse JSON response:', parseError);
-        console.log('Raw response:', analysisText);
-        structuredResults = null;
-      }
-    } else {
-      const errorText = await openaiResponse.text();
-      console.error('OpenAI API error:', openaiResponse.status, errorText);
-      analysisText = `OpenAI API Error (${openaiResponse.status}): ${errorText}`;
     }
-    
-    // Create results object - use structured data if available, fallback otherwise
-    const results = {
-      analysis_date: new Date().toISOString().split('T')[0],
-      ai_status: openaiResponse.ok ? 'success' : 'failed',
-      ai_error: openaiResponse.ok ? null : `Status: ${openaiResponse.status}`,
-      analysis: !structuredResults ? analysisText : 'Structured analysis completed successfully',
-      companies: structuredResults?.companies || companies.map(company => ({
-        name: company,
-        overall_rating: openaiResponse.ok ? 'analyzed' : 'error', 
-        risk_level: openaiResponse.ok ? 'medium' : 'unknown',
-        key_strengths: openaiResponse.ok ? ['Market presence', 'Financial stability'] : ['OpenAI API Error'],
-        key_weaknesses: openaiResponse.ok ? ['Market volatility', 'Competition'] : ['Analysis failed'],
-        recommendations: openaiResponse.ok ? 'See analysis above' : analysisText.substring(0, 100) + '...',
-        ai_working: openaiResponse.ok
-      })),
-      portfolio_summary: structuredResults?.portfolio_summary || null,
-      debug_info: {
-        ai_response_status: openaiResponse.status,
-        api_key_length: openaiKey?.length || 0,
-        timestamp: new Date().toISOString(),
-        structured_data_parsed: !!structuredResults
-      }
-    };
 
-    // Enhanced response with consistency metadata
+    // Use the enhanced analysis result
     const enhancedResponse = {
       success: true,
-      data: analysisResult,
+      results: analysisResult,
       consistency: {
         seed: analysisConfig.seed,
         temperature: analysisConfig.temperature,
@@ -307,3 +258,19 @@ serve(async (req) => {
         } 
       }
     );
+
+  } catch (error) {
+    console.error('Error in financial-analysis function:', error);
+    return new Response(
+      JSON.stringify({ 
+        success: false, 
+        error: error.message,
+        consistency: null
+      }),
+      {
+        status: 500,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      }
+    );
+  }
+});

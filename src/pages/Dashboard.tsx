@@ -441,6 +441,41 @@ const Dashboard = () => {
     setAnalysisMode('quick');
   };
 
+  const handleHealthCheck = async () => {
+    try {
+      toast({
+        title: "Testing OpenAI API...",
+        description: "Checking API connection and authentication",
+      });
+
+      const { data, error } = await supabase.functions.invoke('openai-health-check');
+
+      if (error) {
+        throw new Error(error.message);
+      }
+
+      if (data.success) {
+        toast({
+          title: "✅ OpenAI API Working",
+          description: `Model: ${data.details.model_used} | Response: "${data.details.response_content}"`,
+        });
+      } else {
+        toast({
+          title: "❌ OpenAI API Issue",
+          description: data.details || data.error,
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error('Health check failed:', error);
+      toast({
+        title: "❌ Health Check Failed",
+        description: error instanceof Error ? error.message : 'Unknown error occurred',
+        variant: "destructive",
+      });
+    }
+  };
+
   const loadAssessments = async () => {
     try {
       const { data, error } = await supabase
@@ -632,6 +667,18 @@ const Dashboard = () => {
                           </CardContent>
                         </Card>
                       </div>
+                    </div>
+
+                    {/* API Health Check Section */}
+                    <div className="space-y-4">
+                      <h3 className="text-lg font-medium">API Health Check</h3>
+                      <Button 
+                        onClick={handleHealthCheck} 
+                        variant="outline"
+                        className="w-full"
+                      >
+                        Test OpenAI API Connection
+                      </Button>
                     </div>
 
                     <Button 

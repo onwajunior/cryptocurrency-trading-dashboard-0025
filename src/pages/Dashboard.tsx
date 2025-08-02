@@ -11,6 +11,8 @@ import CompanyConfirmation from "@/components/CompanyConfirmation";
 import AnalysisResults from "@/components/AnalysisResults";
 import BatchAnalysisResults from "@/components/BatchAnalysisResults";
 import { generatePDF } from "@/lib/pdfGenerator";
+import { enhancedAnalysis, generateConsistentId, formatConsistencyReport } from '@/lib/enhancedAnalysis';
+import { toast } from "sonner";
 
 import React from "react";
 

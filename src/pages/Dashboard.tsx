@@ -28,6 +28,10 @@ const Dashboard = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [analysisMode, setAnalysisMode] = useState<'quick' | 'detailed'>('quick');
   const { toast } = useToast();
+  // Enhanced state for consistency tracking
+  const [analysisConsistency, setAnalysisConsistency] = useState<any>(null);
+  const [cacheStatus, setCacheStatus] = useState<'none' | 'hit' | 'miss'>('none');
+  const [consistencyScore, setConsistencyScore] = useState<number>(0);
 
   // Initialize authentication
   useEffect(() => {
@@ -107,78 +111,172 @@ const Dashboard = () => {
   const handleConfirmCompanies = async (confirmedCompanies: string[]) => {
     try {
       setCurrentStep('analyzing');
-
+      
+      // Enhanced analysis with consistency checks
+      console.log('🚀 Starting enhanced analysis:', {
+        companies: confirmedCompanies,
+        timestamp: new Date().toISOString()
+      });
+  
+      // Check for cached analysis first
+      const cachedResult = enhancedAnalysis.getCachedAnalysis(confirmedCompanies, analysisMode);
+      if (cachedResult) {
+        setCacheStatus('hit');
+        setAnalysisResults(cachedResult.data);
+        setAnalysisConsistency(cachedResult.consistency);
+        setConsistencyScore(98); // High score for cached results
+        
+        toast.success('Analysis retrieved from cache for maximum consistency!', {
+          description: formatConsistencyReport(cachedResult.consistency)
+        });
+        
+        setCurrentStep('results');
+        return;
+      }
+  
+      setCacheStatus('miss');
+  
       // Get current user
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
         throw new Error('User not authenticated');
       }
-
+  
       // Check current assessment count and delete oldest if necessary
       const { data: existingAssessments, error: countError } = await supabase
         .from('assessments')
         .select('id, created_at')
         .eq('user_id', user.id)
         .order('created_at', { ascending: true });
-
+  
       if (countError) throw countError;
-
+  
       // If we have 5 or more assessments, delete the oldest
       if (existingAssessments && existingAssessments.length >= 5) {
         const { error: deleteError } = await supabase
           .from('assessments')
           .delete()
           .eq('id', existingAssessments[0].id);
-
+  
         if (deleteError) throw deleteError;
       }
-
-      // Create assessment record
+  
+      // Generate deterministic seed for consistency
+      const analysisSeed = enhancedAnalysis.generateSeed(confirmedCompanies);
+      
+      // Create assessment record with enhanced metadata
       const { data: assessment, error } = await supabase
         .from('assessments')
         .insert({
           user_id: user.id,
-          name: `Risk Assessment - ${new Date().toLocaleDateString()}`,
+          name: `Enhanced Risk Assessment - ${new Date().toLocaleDateString()}`,
           companies: confirmedCompanies,
-          status: 'pending'
+          status: 'pending',
+          analysis_seed: analysisSeed, // Store seed for consistency
+          analysis_mode: analysisMode,
+          consistency_level: 'maximum'
         })
         .select()
         .single();
-
+  
       if (error) throw error;
-
+  
       setCurrentAssessmentId(assessment.id);
-
-      // Call the financial analysis edge function
-      const response = await supabase.functions.invoke('financial-analysis', {
-        body: {
-          companies: confirmedCompanies,
-          assessmentId: assessment.id,
-          mode: analysisMode
-        }
-      });
-
-      if (response.error) {
-        throw new Error(response.error.message || 'Analysis failed');
+  
+      // Enhanced analysis with circuit breaker
+      if (enhancedAnalysis.isCircuitOpen()) {
+        throw new Error('Service temporarily unavailable. Please try again in a few minutes.');
       }
-
-      setAnalysisResults(response.data.results);
-      setCurrentStep(analysisMode === 'quick' ? 'batch-results' : 'results');
-
-      toast({
-        title: "Analysis Complete",
-        description: "Financial risk analysis has been completed successfully.",
+  
+      // Call the enhanced financial analysis function
+      const response = await enhancedAnalysis.withRetry(async () => {
+        const result = await supabase.functions.invoke('financial-analysis', {
+          body: {
+            companies: confirmedCompanies,
+            assessmentId: assessment.id,
+            mode: analysisMode,
+            seed: analysisSeed, // Pass seed for deterministic results
+            consistencyLevel: 'maximum'
+          }
+        });
+  
+        if (result.error) {
+          throw new Error(result.error.message || 'Analysis failed');
+        }
+  
+        return result;
       });
-
+  
+      enhancedAnalysis.recordSuccess();
+  
+      if (response.data?.success && response.data?.data) {
+        const analysisData = response.data.data;
+        const consistencyData = response.data.consistency;
+  
+        // Cache the results for future consistency
+        enhancedAnalysis.setCachedAnalysis(confirmedCompanies, analysisMode, {
+          data: analysisData,
+          consistency: consistencyData
+        });
+  
+        // Calculate consistency score
+        const score = calculateConsistencyScore(consistencyData);
+        setConsistencyScore(score);
+  
+        setAnalysisResults(analysisData);
+        setAnalysisConsistency(consistencyData);
+  
+        // Update assessment status
+        await supabase
+          .from('assessments')
+          .update({ 
+            status: 'completed',
+            consistency_score: score,
+            analysis_metadata: consistencyData
+          })
+          .eq('id', assessment.id);
+  
+        toast.success('Enhanced analysis completed!', {
+          description: `Consistency Score: ${score}/100 | Seed: ${analysisSeed}`
+        });
+  
+        setCurrentStep('results');
+      } else {
+        throw new Error('Invalid response from analysis service');
+      }
+  
     } catch (error) {
-      console.error('Analysis error:', error);
-      toast({
-        title: "Analysis Failed",
-        description: error instanceof Error ? error.message : "Failed to analyze companies. Please try again.",
-        variant: "destructive",
+      enhancedAnalysis.recordFailure();
+      console.error('Enhanced analysis error:', error);
+      
+      toast.error('Analysis failed', {
+        description: error instanceof Error ? error.message : 'Unknown error occurred'
       });
-      setCurrentStep('input');
+      
+      setCurrentStep('confirm');
     }
+  };
+  
+  // Helper function to calculate consistency score
+  const calculateConsistencyScore = (consistency: any): number => {
+    let score = 100;
+    
+    // Deduct points for high temperature
+    if (consistency.temperature > 0.2) {
+      score -= (consistency.temperature - 0.2) * 100;
+    }
+    
+    // Deduct points for multiple attempts
+    if (consistency.attempts > 1) {
+      score -= (consistency.attempts - 1) * 5;
+    }
+    
+    // Bonus for deterministic seed
+    if (consistency.seed) {
+      score += 5;
+    }
+    
+    return Math.max(0, Math.min(100, Math.round(score)));
   };
 
   const handleCancelAnalysis = () => {

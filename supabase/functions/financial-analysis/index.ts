@@ -38,7 +38,7 @@ serve(async (req) => {
     const analysisConfig = {
       temperature: 0.1, // Maximum consistency (vs Code 1's 0.3)
       seed: Math.abs(companies.join('').split('').reduce((a, b) => a + b.charCodeAt(0), 0)), // Deterministic seed
-      model: 'gpt-4-1106-preview',
+      model: 'gpt-4.1-2025-04-14',
       max_tokens: maxTokens,
       top_p: 0.1, // Further reduce randomness
       frequency_penalty: 0,
@@ -85,51 +85,57 @@ serve(async (req) => {
               {
                 role: 'user',
                 content: isQuickMode ? 
-                  `ENHANCED QUICK ANALYSIS MODE - MAXIMUM CONSISTENCY
+                  `REAL FINANCIAL ANALYSIS - QUICK MODE
                   
-                  Companies: ${companies.join(', ')}
+                  Companies to analyze: ${companies.join(', ')}
                   Analysis Seed: ${analysisConfig.seed}
                   
-                  MANDATORY CONSISTENCY PROTOCOL:
-                  1. Use IDENTICAL methodology for repeated analysis
-                  2. Source data from most recent 10-K filings only
-                  3. Apply consistent fiscal year (latest available)
-                  4. Use deterministic calculation methods
-                  5. Return identical results for identical inputs
+                  CRITICAL REQUIREMENTS:
+                  1. Use REAL financial data from latest SEC filings (10-K, 10-Q)
+                  2. Get CORRECT ticker symbols (e.g., Apple = AAPL, Microsoft = MSFT)
+                  3. Calculate actual ratios from real financial statements
+                  4. Use consistent methodology for deterministic results
+                  5. Return RAW JSON ONLY (no markdown, no backticks, no code blocks)
                   
-                  REQUIRED JSON FORMAT:
+                  For each company:
+                  - Find correct NYSE/NASDAQ ticker symbol
+                  - Get latest financial data from SEC EDGAR or reliable financial APIs
+                  - Calculate real debt-to-equity, current ratio, ROE from actual numbers
+                  - Provide accurate risk assessment based on real metrics
+                  
+                  EXACT JSON FORMAT (return ONLY this, no extra text):
                   {
                     "companies": [
                       {
-                        "name": "Company Name",
-                        "ticker": "TICKER",
+                        "name": "Exact Company Name",
+                        "ticker": "CORRECT_TICKER",
                         "analysis": {
-                          "riskScore": number (0-100),
+                          "riskScore": REAL_NUMBER_0_TO_100,
                           "riskLevel": "Low|Medium|High",
                           "keyMetrics": {
-                            "debtToEquity": number,
-                            "currentRatio": number,
-                            "roe": number
+                            "debtToEquity": REAL_CALCULATED_RATIO,
+                            "currentRatio": REAL_CALCULATED_RATIO,
+                            "roe": REAL_CALCULATED_PERCENTAGE_AS_DECIMAL
                           },
                           "recommendation": "Buy|Hold|Sell",
-                          "confidence": number (0-100),
-                          "dataSource": "10-K filing date",
-                          "analysisId": "${analysisConfig.seed}"
+                          "confidence": CONFIDENCE_0_TO_100,
+                          "dataSource": "SEC Filing Date or Data Source",
+                          "analysisId": "real-${analysisConfig.seed}"
                         }
                       }
                     ],
                     "portfolioSummary": {
-                      "averageRisk": number,
-                      "recommendation": "string",
-                      "consistency": "deterministic"
+                      "averageRisk": CALCULATED_AVERAGE,
+                      "recommendation": "Detailed recommendation based on real analysis",
+                      "consistency": "real-financial-data"
                     }
                   }` :
-                  `ENHANCED DETAILED ANALYSIS MODE - MAXIMUM CONSISTENCY
+                  `REAL FINANCIAL ANALYSIS - DETAILED MODE
                   
                   Companies: ${companies.join(', ')}
                   Analysis Seed: ${analysisConfig.seed}
                   
-                  [Similar enhanced prompt for detailed mode...]`
+                  [Enhanced detailed analysis with real financial data - same requirements as quick mode but with comprehensive analysis]`
               }
             ]
           })
@@ -144,9 +150,20 @@ serve(async (req) => {
         if (openaiData.choices && openaiData.choices[0] && openaiData.choices[0].message) {
           const content = openaiData.choices[0].message.content;
           
-          // Enhanced JSON parsing with validation
+          // Enhanced JSON parsing - handle markdown-wrapped responses
           try {
-            const parsedResult = JSON.parse(content);
+            let jsonContent = content.trim();
+            
+            // Remove markdown code block wrapper if present
+            if (jsonContent.startsWith('```json')) {
+              jsonContent = jsonContent.replace(/^```json\s*/, '').replace(/\s*```$/, '');
+            } else if (jsonContent.startsWith('```')) {
+              jsonContent = jsonContent.replace(/^```\s*/, '').replace(/\s*```$/, '');
+            }
+            
+            console.log('🔧 Cleaned JSON content:', jsonContent.substring(0, 200) + '...');
+            
+            const parsedResult = JSON.parse(jsonContent);
             
             // Validate required structure
             if (parsedResult.companies && Array.isArray(parsedResult.companies)) {
@@ -171,6 +188,7 @@ serve(async (req) => {
             }
           } catch (parseError) {
             console.warn(`⚠️ JSON parsing failed on attempt ${attemptCount}:`, parseError);
+            console.warn(`⚠️ Raw content (first 500 chars):`, content.substring(0, 500));
             if (attemptCount === maxAttempts) {
               throw new Error('Failed to parse analysis after all attempts');
             }

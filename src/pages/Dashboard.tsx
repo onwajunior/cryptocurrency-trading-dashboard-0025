@@ -187,8 +187,13 @@ const Dashboard = () => {
       if (cachedResult) {
         console.log('🎯 Cached result structure:', cachedResult);
         console.log('🎯 Cached data structure:', cachedResult.data);
+        
+        // The cached data structure should match what AnalysisResults expects
+        const analysisData = cachedResult.data?.results || cachedResult.data;
+        console.log('🎯 Final analysis data for component:', analysisData);
+        
         setCacheStatus('hit');
-        setAnalysisResults(cachedResult.data);
+        setAnalysisResults(analysisData);
         setAnalysisConsistency(cachedResult.consistency);
         setConsistencyScore(98); // High score for cached results
         

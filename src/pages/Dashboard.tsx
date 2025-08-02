@@ -311,10 +311,32 @@ const Dashboard = () => {
         console.log('🔥 Analysis data structure:', analysisData);
         console.log('🔥 Analysis data companies:', analysisData?.companies);
 
-        // Ensure the data has the required format for AnalysisResults component
+        // Transform the edge function data structure to match what AnalysisResults expects
         const formattedAnalysisData = {
           ...analysisData,
           analysis_date: new Date().toLocaleDateString(),
+          companies: analysisData.companies?.map((company: any) => ({
+            name: company.name,
+            ticker: company.ticker,
+            // Transform the analysis.keyMetrics structure to the expected format
+            liquidity_ratios: {
+              current_ratio: company.analysis?.keyMetrics?.currentRatio || 0,
+              quick_ratio: company.analysis?.keyMetrics?.quickRatio || company.analysis?.keyMetrics?.currentRatio * 0.8 || 0
+            },
+            solvency_ratios: {
+              debt_to_equity: company.analysis?.keyMetrics?.debtToEquity || 0
+            },
+            profitability_ratios: {
+              roe: company.analysis?.keyMetrics?.roe || 0
+            },
+            // Add other expected fields
+            overall_rating: company.analysis?.riskLevel || 'Medium',
+            altman_z_score: {
+              score: company.analysis?.riskScore ? company.analysis.riskScore / 10 : 3.0,
+              zone: company.analysis?.riskLevel === 'Low' ? 'Safe' : 
+                     company.analysis?.riskLevel === 'Medium' ? 'Grey' : 'Distress'
+            }
+          })) || []
         };
 
         console.log('🔥 Formatted analysis data:', formattedAnalysisData);

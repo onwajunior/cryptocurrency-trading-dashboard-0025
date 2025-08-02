@@ -285,6 +285,10 @@ const Dashboard = () => {
         const analysisData = response.data.results;
         const consistencyData = response.data.consistency;
 
+        console.log('🔥 Raw edge function response:', response.data);
+        console.log('🔥 Analysis data structure:', analysisData);
+        console.log('🔥 Analysis data companies:', analysisData?.companies);
+
         // Cache the results for future consistency
         enhancedAnalysis.setCachedAnalysis(confirmedCompanies, analysisMode, {
           data: analysisData,
